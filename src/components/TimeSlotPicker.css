@@ -1,0 +1,69 @@
+/* ── WRAPPER ─────────────────────────────────────────────────── */
+.tsp-wrapper { position: relative; width: 100%; }
+
+/* ── TRIGGER ─────────────────────────────────────────────────── */
+.tsp-input {
+  display: flex; align-items: center; gap: 8px;
+  padding: 11px 14px; border: 1px solid #2e3a52;
+  border-radius: 8px; cursor: pointer; background: #1e2433;
+  transition: all 0.2s; user-select: none;
+}
+.tsp-input:hover    { border-color: #3b82f6; }
+.tsp-input--open    { border-color: #3b82f6; box-shadow: 0 0 0 3px rgba(59,130,246,0.15); }
+.tsp-icon           { font-size: 15px; flex-shrink: 0; }
+.tsp-value          { flex: 1; font-size: 14px; color: #e2e8f0; font-weight: 500; }
+.tsp-placeholder    { color: #64748b; font-weight: 400; }
+.tsp-chevron        { font-size: 10px; color: #94a3b8; flex-shrink: 0; }
+
+/* ── POPUP ───────────────────────────────────────────────────── */
+.tsp-popup {
+  position: absolute; top: calc(100% + 6px);
+  left: 0; right: 0; z-index: 9999;
+  background: #1e2433; border: 1px solid #2e3a52;
+  border-radius: 12px; box-shadow: 0 8px 32px rgba(0,0,0,0.6);
+  padding: 12px; box-sizing: border-box;
+  animation: tsp-in 0.15s ease;
+}
+@keyframes tsp-in {
+  from { opacity: 0; transform: translateY(-6px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+.tsp-empty { text-align: center; color: #64748b; font-size: 13px; padding: 12px 0; }
+
+/* ── GROUP ───────────────────────────────────────────────────── */
+.tsp-group { margin-bottom: 10px; }
+.tsp-group:last-child { margin-bottom: 0; }
+
+.tsp-group-label {
+  display: flex; align-items: center; gap: 6px;
+  font-size: 11px; font-weight: 700; text-transform: uppercase;
+  letter-spacing: 0.6px; color: #94a3b8;
+  padding: 0 4px 6px;
+  border-bottom: 1px solid #2e3a52;
+  margin-bottom: 6px;
+}
+
+/* ── SLOT CARDS ──────────────────────────────────────────────── */
+.tsp-slots { display: flex; flex-direction: column; gap: 4px; }
+
+.tsp-slot {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 9px 12px; border-radius: 8px; border: 1.5px solid #2e3a52;
+  background: #252e42; cursor: pointer; transition: all 0.15s;
+  text-align: left; width: 100%;
+}
+.tsp-slot:hover:not(.tsp-slot--selected) {
+  border-color: #93c5fd; background: #1e3a5f;
+}
+.tsp-slot--selected {
+  border-color: #2563eb; background: #2563eb;
+}
+.tsp-slot--selected .tsp-slot-time { color: #fff; }
+
+.tsp-slot-time {
+  font-size: 13px; font-weight: 600; color: #e2e8f0;
+}
+.tsp-check {
+  font-size: 13px; font-weight: 700; color: #fff;
+}

@@ -1,0 +1,83 @@
+.ac-page    { max-width: 1200px; }
+.ac-loading { text-align:center; padding:60px; color:var(--text-secondary); font-size:15px; }
+.ac-error   { background:#2d0a0a; color:#fca5a5; border:1px solid #7f1d1d; border-radius:8px; padding:16px; }
+
+/* ── HEADER ──────────────────────────────────────────────────── */
+.ac-header  { margin-bottom:24px; }
+.ac-title   { font-size:24px; font-weight:800; color:var(--text-primary); margin:0 0 4px; }
+.ac-sub     { font-size:14px; color:var(--text-secondary); margin:0; }
+
+/* ── OVERVIEW STATS ──────────────────────────────────────────── */
+.ac-stats-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 14px;
+  margin-bottom: 24px;
+}
+
+.ac-stat-card {
+  background: var(--bg-primary); border: 1px solid var(--border-color);
+  border-radius: 12px; padding: 18px 16px;
+  display: flex; gap: 14px; align-items: flex-start;
+  transition: box-shadow 0.2s;
+}
+.ac-stat-card:hover { box-shadow: var(--shadow-md); }
+.ac-stat-icon  { font-size: 26px; flex-shrink: 0; }
+.ac-stat-value { font-size: 26px; font-weight: 800; line-height: 1; margin: 0 0 3px; }
+.ac-stat-label { font-size: 12px; font-weight: 700; color: var(--text-secondary); text-transform: uppercase; letter-spacing: 0.4px; margin: 0 0 2px; }
+.ac-stat-sub   { font-size: 11px; color: var(--text-tertiary); margin: 0; }
+
+/* ── CHART ROWS ──────────────────────────────────────────────── */
+.ac-charts-row {
+  display: grid;
+  grid-template-columns: 2fr 1fr;
+  gap: 16px;
+  margin-bottom: 20px;
+}
+
+.ac-chart-card {
+  background: var(--bg-primary); border: 1px solid var(--border-color);
+  border-radius: 14px; padding: 20px;
+}
+.ac-chart-card.ac-wide { /* default */ }
+.ac-chart-title { font-size: 14px; font-weight: 700; color: var(--text-primary); margin: 0 0 16px; }
+.ac-no-data     { text-align: center; padding: 40px 0; color: var(--text-secondary); font-size: 13px; }
+
+/* ── TOOLTIP ─────────────────────────────────────────────────── */
+.ac-tooltip {
+  background: var(--bg-primary); border: 1px solid var(--border-color);
+  border-radius: 8px; padding: 10px 14px;
+  box-shadow: var(--shadow-md); font-size: 13px;
+}
+.ac-tooltip-label { font-weight: 700; color: var(--text-primary); margin: 0 0 4px; }
+
+/* ── PIE LEGEND ──────────────────────────────────────────────── */
+.ac-pie-legend   { display: flex; justify-content: center; gap: 16px; flex-wrap: wrap; margin-top: 8px; }
+.ac-legend-item  { display: flex; align-items: center; gap: 6px; font-size: 12px; color: var(--text-secondary); }
+.ac-legend-dot   { width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0; }
+
+/* ── STATUS BARS ─────────────────────────────────────────────── */
+.ac-status-bars { display: flex; flex-direction: column; gap: 10px; }
+.ac-status-row  { display: flex; align-items: center; gap: 10px; }
+.ac-status-name { font-size: 12px; font-weight: 600; color: var(--text-secondary); width: 70px; flex-shrink: 0; }
+.ac-status-track { flex: 1; height: 8px; background: var(--border-color); border-radius: 99px; overflow: hidden; }
+.ac-status-fill  { height: 100%; border-radius: 99px; transition: width 0.6s ease; }
+.ac-status-count { font-size: 13px; font-weight: 800; width: 30px; text-align: right; flex-shrink: 0; }
+
+/* ── FEEDBACK BARS ───────────────────────────────────────────── */
+.ac-feedback-list { display: flex; flex-direction: column; gap: 10px; }
+.ac-fb-row        { display: flex; align-items: center; gap: 8px; }
+.ac-fb-cat        { font-size: 11px; color: var(--text-secondary); width: 110px; flex-shrink: 0; font-weight: 600; }
+.ac-fb-bar-track  { flex: 1; height: 8px; background: var(--border-color); border-radius: 99px; overflow: hidden; }
+.ac-fb-bar-fill   { height: 100%; border-radius: 99px; transition: width 0.6s ease; }
+.ac-fb-score      { font-size: 12px; font-weight: 800; width: 30px; text-align: right; flex-shrink: 0; }
+.ac-fb-count      { font-size: 11px; color: var(--text-tertiary); flex-shrink: 0; }
+
+/* ── RESPONSIVE ──────────────────────────────────────────────── */
+@media (max-width: 900px) {
+  .ac-stats-grid  { grid-template-columns: repeat(2, 1fr); }
+  .ac-charts-row  { grid-template-columns: 1fr; }
+}
+@media (max-width: 480px) {
+  .ac-stats-grid  { grid-template-columns: 1fr 1fr; }
+}

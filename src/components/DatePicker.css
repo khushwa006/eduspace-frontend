@@ -1,0 +1,166 @@
+/* ── WRAPPER ─────────────────────────────────────────────────── */
+.dp-wrapper {
+  position: relative;
+  width: 100%;
+}
+
+/* ── INPUT TRIGGER ───────────────────────────────────────────── */
+.dp-input {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 11px 14px;
+  border: 1px solid #2e3a52;
+  border-radius: 8px;
+  cursor: pointer;
+  background: #1e2433;
+  transition: all 0.2s;
+  user-select: none;
+}
+.dp-input:hover        { border-color: #3b82f6; }
+.dp-input--open        { border-color: #3b82f6; box-shadow: 0 0 0 3px rgba(59,130,246,0.15); }
+.dp-icon               { font-size: 15px; flex-shrink: 0; }
+.dp-value              { flex: 1; font-size: 14px; color: #e2e8f0; font-weight: 500; }
+.dp-placeholder        { color: #64748b; font-weight: 400; }
+.dp-chevron            { font-size: 10px; color: #94a3b8; flex-shrink: 0; }
+
+/* ── POPUP ─────────────────────────────────────────────────────
+   Key fix: use min-width instead of fixed width, and constrain
+   with max-width so it never overflows its container.
+─────────────────────────────────────────────────────────────── */
+.dp-popup {
+  position: absolute;
+  top: calc(100% + 6px);
+  left: 0;
+  right: 0;           /* stretch to fill parent width */
+  z-index: 9999;
+  background: #1e2433;
+  border: 1px solid #2e3a52;
+  border-radius: 12px;
+  box-shadow: 0 8px 32px rgba(0,0,0,0.13);
+  padding: 14px;
+  animation: dp-slide-in 0.15s ease;
+  box-sizing: border-box;
+  min-width: 260px;
+  max-width: 100%;    /* never wider than the input */
+}
+
+@keyframes dp-slide-in {
+  from { opacity: 0; transform: translateY(-6px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+/* ── HEADER ──────────────────────────────────────────────────── */
+.dp-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 10px;
+}
+
+.dp-nav {
+  background: #252e42;
+  border: none;
+  border-radius: 6px;
+  width: 28px;
+  height: 28px;
+  font-size: 17px;
+  cursor: pointer;
+  color: #e2e8f0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 0.15s;
+  flex-shrink: 0;
+  line-height: 1;
+}
+.dp-nav:hover { background: #dbeafe; color: #1d4ed8; }
+
+.dp-month-year { display: flex; align-items: center; gap: 5px; }
+.dp-month-label { font-size: 14px; font-weight: 700; color: #e2e8f0; }
+.dp-year-label {
+  font-size: 14px; font-weight: 700; color: #3b82f6;
+  cursor: pointer; border-bottom: 1px dashed #93c5fd;
+}
+.dp-year-input {
+  width: 56px; padding: 2px 4px;
+  border: 1px solid #3b82f6; border-radius: 4px;
+  font-size: 13px; font-weight: 700; text-align: center;
+}
+.dp-year-input:focus { outline: none; }
+
+/* ── DAY NAMES ───────────────────────────────────────────────── */
+.dp-day-names {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  margin-bottom: 4px;
+}
+.dp-day-names span {
+  text-align: center;
+  font-size: 10px;
+  font-weight: 700;
+  color: #94a3b8;
+  text-transform: uppercase;
+  padding: 3px 0;
+}
+.dp-day-names .dp-weekend { color: #f59e0b; }
+
+/* ── DATE GRID ───────────────────────────────────────────────── */
+.dp-grid {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 1px;
+}
+
+.dp-cell {
+  aspect-ratio: 1;
+  border: none;
+  background: none;
+  border-radius: 6px;
+  font-size: 12px;
+  font-weight: 500;
+  color: #e2e8f0;
+  cursor: pointer;
+  transition: all 0.12s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+}
+.dp-cell:hover:not(.dp-cell--disabled):not(.dp-cell--empty):not(.dp-cell--selected) {
+  background: #1e3a5f;
+  color: #93c5fd;
+}
+.dp-cell--empty    { cursor: default; pointer-events: none; }
+.dp-cell--weekend  { color: #f59e0b; }
+.dp-cell--today    {
+  background: #1e3a5f; color: #2563eb;
+  font-weight: 700; border: 1.5px solid #93c5fd;
+}
+.dp-cell--selected {
+  background: #2563eb !important;
+  color: #fff !important;
+  font-weight: 700; border: none;
+}
+.dp-cell--disabled {
+  color: #374151; cursor: not-allowed; text-decoration: line-through;
+}
+
+/* ── FOOTER ──────────────────────────────────────────────────── */
+.dp-footer {
+  display: flex;
+  gap: 8px;
+  margin-top: 10px;
+  padding-top: 10px;
+  border-top: 1px solid #2e3a52;
+}
+.dp-today-btn, .dp-clear-btn {
+  flex: 1; padding: 6px 0;
+  border-radius: 6px; border: none;
+  font-size: 12px; font-weight: 600;
+  cursor: pointer; transition: all 0.15s;
+}
+.dp-today-btn { background: #2563eb; color: #fff; }
+.dp-today-btn:hover { background: #1d4ed8; }
+.dp-clear-btn { background: #252e42; color: #94a3b8; }
+.dp-clear-btn:hover { background: #2e3a52; }

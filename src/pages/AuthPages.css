@@ -1,0 +1,126 @@
+.auth-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 100vh;
+  background: linear-gradient(135deg, #2b1055 0%, #1a1a4e 50%, #0d1b4c 100%);
+}
+
+.auth-card {
+  background: rgba(43, 16, 85, 0.35);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  padding: 40px;
+  border-radius: 12px;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+  width: 100%;
+  max-width: 420px;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+}
+
+.auth-card h1 {
+  text-align: center;
+  color: #e2e8f0;
+  margin-bottom: 10px;
+}
+
+.auth-card h2 {
+  text-align: center;
+  color: #3b82f6;
+  font-size: 20px;
+  margin-bottom: 20px;
+}
+
+.auth-card form {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+}
+
+.auth-card input,
+.auth-card select {
+  padding: 12px 14px;
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  border-radius: 8px;
+  font-size: 14px;
+  background: rgba(255, 255, 255, 0.06);
+  color: #e2e8f0;
+  transition: all 0.2s;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.auth-card input::placeholder {
+  color: #64748b;
+}
+
+.auth-card select option {
+  background: #2b1055;
+  color: #e2e8f0;
+}
+
+.auth-card input:focus,
+.auth-card select:focus {
+  outline: none;
+  border-color: #3b82f6;
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.2);
+  background: rgba(255, 255, 255, 0.1);
+}
+
+.auth-card button[type="submit"] {
+  padding: 12px;
+  background: #3b82f6;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  font-size: 16px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.2s;
+  letter-spacing: 0.3px;
+}
+
+.auth-card button[type="submit"]:hover:not(:disabled) {
+  background: #2563eb;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 14px rgba(59,130,246,0.4);
+}
+
+.auth-card button[type="submit"]:disabled {
+  background: rgba(255, 255, 255, 0.1);
+  color: #94a3b8;
+  cursor: not-allowed;
+}
+
+.auth-card p {
+  text-align: center;
+  color: #94a3b8;
+  margin: 16px 0 0 0;
+  font-size: 14px;
+}
+
+.link-button {
+  background: none;
+  border: none;
+  color: #3b82f6;
+  cursor: pointer;
+  text-decoration: underline;
+  padding: 0;
+  font-size: 14px;
+}
+
+.link-button:hover {
+  color: #60a5fa;
+}
+
+.error-message {
+  background: #450a0a;
+  color: #fca5a5;
+  padding: 12px;
+  border-radius: 8px;
+  border-left: 4px solid #ef4444;
+  margin-bottom: 10px;
+  text-align: center;
+  font-size: 14px;
+  font-weight: 500;
+}
