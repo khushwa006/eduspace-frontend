@@ -1,4 +1,4 @@
-const API_BASE = 'http://localhost:5000';
+const API_BASE = 'https://eduspace-backend-bh29.onrender.com';
 const TOKEN_KEY = 'jwt_token';
 
 function handleUnauthorized() {
