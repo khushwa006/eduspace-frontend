@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import './Timetable.css';
 
-const API = 'http://localhost:5000';
+const API = 'https://eduspace-backend-bh29.onrender.com';
 const headers = () => ({ 'Authorization': `Bearer ${localStorage.getItem('jwt_token')}` });
 
 const DAYS = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
