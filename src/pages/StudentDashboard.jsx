@@ -88,7 +88,7 @@ export default function StudentDashboard({ onLogout }) {
   useEffect(() => {
     if (!showHolidays) return;
     setHolidaysLoading(true);
-    fetch('http://localhost:5000/api/admin/holidays', {
+    fetch('https://eduspace-backend-bh29.onrender.com/api/admin/holidays', {
       headers: { 'Authorization': `Bearer ${localStorage.getItem('jwt_token')}` }
     })
       .then(r => r.json())
@@ -131,7 +131,7 @@ export default function StudentDashboard({ onLogout }) {
       const token = localStorage.getItem('jwt_token');
       if (!token) return;
 
-      const response = await fetch('http://localhost:5000/api/auth/profile', {
+      const response = await fetch('https://eduspace-backend-bh29.onrender.com/api/auth/profile', {
         headers: {
           'Authorization': `Bearer ${token}`
         }
@@ -168,7 +168,7 @@ export default function StudentDashboard({ onLogout }) {
     if (digits) setUserProfile(prev => ({ ...prev, phone: digits }));
     try {
       const token = localStorage.getItem('jwt_token');
-      const response = await fetch('http://localhost:5000/api/auth/profile', {
+      const response = await fetch('https://eduspace-backend-bh29.onrender.com/api/auth/profile', {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
@@ -207,7 +207,7 @@ export default function StudentDashboard({ onLogout }) {
 
     try {
       const token = localStorage.getItem('jwt_token');
-      const response = await fetch('http://localhost:5000/api/auth/change-password', {
+      const response = await fetch('https://eduspace-backend-bh29.onrender.com/api/auth/change-password', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -240,7 +240,7 @@ export default function StudentDashboard({ onLogout }) {
     setTwoFaError('');
     try {
       const token = localStorage.getItem('jwt_token');
-      const res = await fetch('http://localhost:5000/api/auth/2fa/toggle', {
+      const res = await fetch('https://eduspace-backend-bh29.onrender.com/api/auth/2fa/toggle', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
         body: JSON.stringify({ password: twoFaPassword, enable })
@@ -299,7 +299,7 @@ export default function StudentDashboard({ onLogout }) {
       async (pos) => {
         try {
           const token = localStorage.getItem('jwt_token');
-          const res = await fetch('http://localhost:5000/api/attendance/geofence', {
+          const res = await fetch('https://eduspace-backend-bh29.onrender.com/api/attendance/geofence', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
             body: JSON.stringify({ latitude: pos.coords.latitude, longitude: pos.coords.longitude })
@@ -363,7 +363,7 @@ export default function StudentDashboard({ onLogout }) {
     setFeedbackLoading(true);
     try {
       const token = localStorage.getItem('jwt_token');
-      const res = await fetch('http://localhost:5000/api/feedback', {
+      const res = await fetch('https://eduspace-backend-bh29.onrender.com/api/feedback', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
         body: JSON.stringify(data)
@@ -388,7 +388,7 @@ export default function StudentDashboard({ onLogout }) {
     reader.onload = async (ev) => {
       const base64 = ev.target.result;
       const token = localStorage.getItem('jwt_token');
-      const res = await fetch('http://localhost:5000/api/auth/profile/photo', {
+      const res = await fetch('https://eduspace-backend-bh29.onrender.com/api/auth/profile/photo', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
         body: JSON.stringify({ photo: base64 })
@@ -406,7 +406,7 @@ export default function StudentDashboard({ onLogout }) {
   const handleRemovePhoto = async () => {
     if (!window.confirm('Remove your profile photo?')) return;
     const token = localStorage.getItem('jwt_token');
-    await fetch('http://localhost:5000/api/auth/profile/photo', {
+    await fetch('https://eduspace-backend-bh29.onrender.com/api/auth/profile/photo', {
       method: 'DELETE',
       headers: { 'Authorization': `Bearer ${token}` }
     });
