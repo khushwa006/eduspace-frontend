@@ -276,7 +276,7 @@ export default function AuthPages({ onLogin }) {
       if (res && res.pending) {
         setError('');
         setIsLogin(true);
-        alert('✅ Registration submitted! Your Faculty account is pending admin approval. You will receive access once an admin approves your account.');
+        alert(`✅ Registration submitted! Your ${res.role ? res.role.charAt(0).toUpperCase() + res.role.slice(1) : ''} account is pending admin approval. You will receive access once an admin approves your account.`);
       } else {
         setError('');
         setIsLogin(true);
