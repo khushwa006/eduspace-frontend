@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import './MyAccount.css';
 
-const API = 'http://localhost:5000';
+const API = 'https://eduspace-backend-bh29.onrender.com';
 const authHeaders = (json = true) => {
   const h = { 'Authorization': `Bearer ${localStorage.getItem('jwt_token')}` };
   if (json) h['Content-Type'] = 'application/json';
