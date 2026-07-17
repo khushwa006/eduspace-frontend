@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { api } from '../services/api';
 import '../pages/FacultyAdminDashboard.css';
 import ThemeToggle from '../components/ThemeToggle';
@@ -31,6 +31,7 @@ export default function AdminDashboard({ onLogout }) {
   const [notifSending, setNotifSending] = useState(false);
   const [campusConfig, setCampusConfig] = useState({name:'',latitude:'',longitude:'',radius_m:''});
   const [configSaving, setConfigSaving] = useState(false);
+  const campusConfigDirty = useRef(false); // true while the admin has unsaved edits — blocks the 10s poll from overwriting them
   const [feedbackFilter, setFeedbackFilter] = useState('all');
   const [selectedRequest, setSelectedRequest] = useState(null);
   const [approvalModal, setApprovalModal] = useState(null); // null, approve, reject
@@ -154,7 +155,7 @@ export default function AdminDashboard({ onLogout }) {
       safeGet('/api/admin/all-feedback',    setAllFeedback,    d => Array.isArray(d) ? d : []),
       safeGet('/api/admin/notifications',   setAllNotifs,      d => Array.isArray(d) ? d : []),
       safeGet('/api/admin/geofence-logs',   setGeofenceLogs,   d => Array.isArray(d) ? d : []),
-      safeGet('/api/campus-config',         d => { if (d) setCampusConfig(d); }),
+      safeGet('/api/campus-config',         d => { if (d && !campusConfigDirty.current) setCampusConfig(d); }),
       safeGet('/api/rooms',                 setAllRooms,       d => Array.isArray(d) ? d : []),
       safeGet('/api/admin/grievances',      setAllGrievances,  d => Array.isArray(d) ? d : []),
       safeGet('/api/admin/grievances/stats',setGrievanceStats, d => d || {}),
@@ -1109,7 +1110,7 @@ export default function AdminDashboard({ onLogout }) {
                 <div key={key} className="form-group">
                   <label style={{fontSize:'12px',fontWeight:700,color:'var(--text-secondary)',textTransform:'uppercase'}}>{label}</label>
                   <input type={type} className="form-input" value={campusConfig[key] || ''}
-                    onChange={e => setCampusConfig(c => ({...c, [key]: e.target.value}))} />
+                    onChange={e => { campusConfigDirty.current = true; setCampusConfig(c => ({...c, [key]: e.target.value})); }} />
                 </div>
               ))}
             </div>
@@ -1119,6 +1120,7 @@ export default function AdminDashboard({ onLogout }) {
                 setConfigSaving(true);
                 try {
                   await api.post('/api/admin/campus-config', campusConfig);
+                  campusConfigDirty.current = false;
                   setMessage({type:'success', text:'Campus location updated!'});
                 } catch { setMessage({type:'error', text:'Failed to update'}); }
                 setConfigSaving(false);
