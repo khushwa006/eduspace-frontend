@@ -18,7 +18,7 @@ export default function NotificationBell() {
 
   const fetchNotifications = async () => {
     try {
-      const res = await fetch('http://localhost:5000/api/notifications', {
+      const res = await fetch('https://eduspace-backend-bh29.onrender.com/api/notifications', {
         headers: { 'Authorization': `Bearer ${token()}` }
       });
       if (!res.ok) return;
@@ -52,7 +52,7 @@ export default function NotificationBell() {
   }, []);
 
   const markRead = async (id) => {
-    await fetch(`http://localhost:5000/api/notifications/${id}/read`, {
+    await fetch(`https://eduspace-backend-bh29.onrender.com/api/notifications/${id}/read`, {
       method: 'POST',
       headers: { 'Authorization': `Bearer ${token()}` }
     });
@@ -61,7 +61,7 @@ export default function NotificationBell() {
 
   const markAllRead = async () => {
     setLoading(true);
-    await fetch('http://localhost:5000/api/notifications/read-all', {
+    await fetch('https://eduspace-backend-bh29.onrender.com/api/notifications/read-all', {
       method: 'POST',
       headers: { 'Authorization': `Bearer ${token()}` }
     });
