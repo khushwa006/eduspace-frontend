@@ -21,8 +21,8 @@ export default function MyAttendance({ onBack }) {
       setLoading(true);
       try {
         const [attRes, gpsRes] = await Promise.all([
-          fetch('http://localhost:5000/api/student/my-attendance', { headers:{'Authorization':`Bearer ${token}`} }),
-          fetch('http://localhost:5000/api/student/my-geofence-logs', { headers:{'Authorization':`Bearer ${token}`} }),
+          fetch('https://eduspace-backend-bh29.onrender.com/api/student/my-attendance', { headers:{'Authorization':`Bearer ${token}`} }),
+          fetch('https://eduspace-backend-bh29.onrender.com/api/student/my-geofence-logs', { headers:{'Authorization':`Bearer ${token}`} }),
         ]);
         const attData = await attRes.json();
         const gpsData = await gpsRes.json();
