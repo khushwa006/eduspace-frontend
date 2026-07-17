@@ -5,7 +5,7 @@ const CAT_ICONS = { Programming:'💻', Music:'🎵', Arts:'🎨', Languages:'�
 const PROF_CONFIG = { beginner:{label:'Beginner',color:'#f59e0b'}, intermediate:{label:'Intermediate',color:'#3b82f6'}, expert:{label:'Expert',color:'#10b981'} };
 const TABS = ['My Skills','Matches','Directory','🏆 Team Up'];
 
-const API = 'http://localhost:5000';
+const API = 'https://eduspace-backend-bh29.onrender.com';
 const headers = () => ({ 'Authorization': `Bearer ${localStorage.getItem('jwt_token')}`, 'Content-Type': 'application/json' });
 const get  = (url) => fetch(API+url,{headers:headers()}).then(r=>r.json());
 const post = (url,body) => fetch(API+url,{method:'POST',headers:headers(),body:JSON.stringify(body)}).then(r=>r.json());
