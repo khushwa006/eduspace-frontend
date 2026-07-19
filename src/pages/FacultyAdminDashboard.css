@@ -747,3 +747,81 @@
 @media (max-width: 768px) {
   .tab-group-label, .tab-group-sep { display: none; }
 }
+
+/* ═══════════════════════════════════════════════════════════════ */
+/* DASHBOARD LANDING MENU — boxy shortcut cards (Faculty & Admin)  */
+/* Replaces the old "all tabs on top bar" navigation with a grid   */
+/* of cards, matching the Student dashboard's card style.          */
+/* ═══════════════════════════════════════════════════════════════ */
+
+.dash-menu-section-label {
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--text-tertiary);
+  text-transform: uppercase;
+  letter-spacing: 0.8px;
+  margin: 28px 0 12px;
+}
+.dash-menu-section-label:first-child { margin-top: 0; }
+
+.dash-menu-grid {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 14px;
+  margin-bottom: 8px;
+}
+@media (max-width: 1100px) { .dash-menu-grid { grid-template-columns: repeat(4, 1fr); } }
+@media (max-width: 860px)  { .dash-menu-grid { grid-template-columns: repeat(3, 1fr); } }
+@media (max-width: 600px)  { .dash-menu-grid { grid-template-columns: repeat(2, 1fr); } }
+
+.dash-menu-card {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  padding: 22px 18px 18px;
+  border-radius: 0;
+  border: 1px solid var(--border-color);
+  background: var(--bg-primary);
+  cursor: pointer;
+  transition: transform 0.18s ease, box-shadow 0.18s ease, border-color 0.18s ease;
+  text-align: left;
+  min-height: 120px;
+  position: relative;
+}
+.dash-menu-card:hover {
+  transform: translateY(-3px);
+  box-shadow: var(--shadow-md);
+  border-color: var(--accent);
+}
+
+.dmc-icon {
+  font-size: 22px;
+  width: 46px; height: 46px;
+  border-radius: 0;
+  display: flex; align-items: center; justify-content: center;
+  margin-bottom: 14px;
+  flex-shrink: 0;
+  background: var(--bg-tertiary);
+}
+
+.dmc-label { font-size: 14px; font-weight: 700; color: var(--text-primary); line-height: 1.2; margin-bottom: 4px; }
+.dmc-desc  { font-size: 11.5px; color: var(--text-secondary); line-height: 1.4; }
+
+.dmc-badge {
+  position: absolute; top: 14px; right: 14px;
+  background: var(--danger); color: #fff;
+  font-size: 11px; font-weight: 700;
+  padding: 2px 7px; border-radius: 0;
+}
+
+.btn-back-menu {
+  padding: 8px 16px;
+  border-radius: 0;
+  border: 1px solid var(--border-color);
+  background: var(--bg-tertiary);
+  color: var(--text-primary);
+  font-size: 14px; font-weight: 600;
+  cursor: pointer;
+  margin-bottom: 20px;
+}
+.btn-back-menu:hover { border-color: var(--accent); color: var(--accent); }
