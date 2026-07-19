@@ -12,7 +12,7 @@ import HolidayCalendar from '../components/HolidayCalendar';
 import '../components/MyAccount.css';
 
 export default function AdminDashboard({ onLogout }) {
-  const [activeTab, setActiveTab] = useState('pending'); // pending, approved, calendar
+  const [activeTab, setActiveTab] = useState('menu'); // menu, pending, approved, calendar, ...
   const [pendingRequests, setPendingRequests] = useState([]);
   const [allBookings, setAllBookings] = useState([]);
   const [user, setUser] = useState(null);
@@ -423,87 +423,70 @@ export default function AdminDashboard({ onLogout }) {
           </div>
         )}
 
-        {/* Tabs */}
-        <div className="tabs-section">
-          <div className="tabs">
-            {/* ── DAILY ── */}
-            <span className="tab-group-label">Daily</span>
-            <button className={`tab ${activeTab === 'pending' ? 'active' : ''}`}
-              onClick={() => setActiveTab('pending')}>
-              ⏳ Pending Approvals {pendingRequests.length > 0 && <span className="badge-pending" style={{marginLeft:'4px',padding:'2px 7px',fontSize:'11px',animation:'none'}}>{pendingRequests.length}</span>}
-            </button>
-            <button className={`tab ${activeTab === 'students' ? 'active' : ''}`}
-              onClick={() => setActiveTab('students')}>
-              🎓 Students {pendingStudents.length > 0 && `(${pendingStudents.length})`}
-            </button>
-            <button className={`tab ${activeTab === 'faculty' ? 'active' : ''}`}
-              onClick={() => setActiveTab('faculty')}>
-              👨‍🏫 Faculty {pendingFaculty.length > 0 && `(${pendingFaculty.length})`}
-            </button>
-            <button className={`tab ${activeTab === 'grievances' ? 'active' : ''}`}
-              onClick={() => setActiveTab('grievances')}>
-              📋 Grievances {grievanceStats.pending > 0 && `(${grievanceStats.pending})`}
-            </button>
+        {/* ── DASHBOARD LANDING MENU ───────────────────────────── */}
+        {activeTab === 'menu' && (
+          <>
+            <div className="dash-menu-section-label">Daily</div>
+            <div className="dash-menu-grid">
+              {[
+                { key: 'pending',    icon: '⏳', label: 'Pending Approvals', desc: 'Review booking requests', badge: pendingRequests.length },
+                { key: 'students',   icon: '🎓', label: 'Students',          desc: 'Manage student accounts', badge: pendingStudents.length },
+                { key: 'faculty',    icon: '👨‍🏫', label: 'Faculty',           desc: 'Manage faculty accounts', badge: pendingFaculty.length },
+                { key: 'grievances', icon: '📋', label: 'Grievances',        desc: 'Handle student complaints', badge: grievanceStats.pending },
+              ].map(({ key, icon, label, desc, badge }) => (
+                <button key={key} className="dash-menu-card" onClick={() => setActiveTab(key)}>
+                  {badge > 0 && <span className="dmc-badge">{badge}</span>}
+                  <span className="dmc-icon">{icon}</span>
+                  <span className="dmc-label">{label}</span>
+                  <span className="dmc-desc">{desc}</span>
+                </button>
+              ))}
+            </div>
 
-            <div className="tab-group-sep" />
+            <div className="dash-menu-section-label">Manage</div>
+            <div className="dash-menu-grid">
+              {[
+                { key: 'rooms',            icon: '🏛️', label: 'Rooms',            desc: 'Add & edit campus rooms' },
+                { key: 'timetable',        icon: '🗓️', label: 'Timetable',        desc: 'Manage class schedules' },
+                { key: 'approved',         icon: '✅', label: 'Bookings',         desc: 'All confirmed bookings', badge: allBookings.length },
+                { key: 'facilitybookings', icon: '🏋️', label: 'Facility',         desc: 'Sports & library bookings' },
+                { key: 'holidays',         icon: '📅', label: 'Holidays',         desc: 'Non-working days' },
+                { key: 'lockedaccounts',   icon: '🔒', label: 'Locked Accounts',  desc: 'Unlock & reset passwords', badge: lockedAccounts.length },
+              ].map(({ key, icon, label, desc, badge }) => (
+                <button key={key} className="dash-menu-card" onClick={() => setActiveTab(key)}>
+                  {badge > 0 && <span className="dmc-badge">{badge}</span>}
+                  <span className="dmc-icon">{icon}</span>
+                  <span className="dmc-label">{label}</span>
+                  <span className="dmc-desc">{desc}</span>
+                </button>
+              ))}
+            </div>
 
-            {/* ── MANAGE ── */}
-            <span className="tab-group-label">Manage</span>
-            <button className={`tab ${activeTab === 'rooms' ? 'active' : ''}`}
-              onClick={() => setActiveTab('rooms')}>
-              🏛️ Rooms
-            </button>
-            <button className={`tab ${activeTab === 'timetable' ? 'active' : ''}`}
-              onClick={() => setActiveTab('timetable')}>
-              🗓️ Timetable
-            </button>
-            <button className={`tab ${activeTab === 'approved' ? 'active' : ''}`}
-              onClick={() => setActiveTab('approved')}>
-              ✅ Bookings ({allBookings.length})
-            </button>
-            <button className={`tab ${activeTab === 'facilitybookings' ? 'active' : ''}`}
-              onClick={() => setActiveTab('facilitybookings')}>
-              🏋️ Facility
-            </button>
-            <button className={`tab ${activeTab === 'holidays' ? 'active' : ''}`}
-              onClick={() => setActiveTab('holidays')}>
-              📅 Holidays
-            </button>
-            <button className={`tab ${activeTab === 'lockedaccounts' ? 'active' : ''}`}
-              onClick={() => setActiveTab('lockedaccounts')}>
-              🔒 Locked {lockedAccounts.length > 0 && `(${lockedAccounts.length})`}
-            </button>
+            <div className="dash-menu-section-label">Insights</div>
+            <div className="dash-menu-grid">
+              {[
+                { key: 'analytics',     icon: '📊', label: 'Analytics',     desc: 'Campus usage insights' },
+                { key: 'feedback',      icon: '📝', label: 'Feedback',      desc: 'Student feedback', badge: allFeedback.length },
+                { key: 'geofence',      icon: '📍', label: 'GPS Logs',      desc: 'Check-in location logs' },
+                { key: 'calendar',      icon: '📅', label: 'Calendar',      desc: 'Campus events calendar' },
+                { key: 'notifications', icon: '🔔', label: 'Notifications',desc: 'Send campus-wide alerts' },
+                { key: 'myaccount',     icon: '👤', label: 'My Account',    desc: 'Profile & security settings' },
+              ].map(({ key, icon, label, desc, badge }) => (
+                <button key={key} className="dash-menu-card" onClick={() => setActiveTab(key)}>
+                  {badge > 0 && <span className="dmc-badge">{badge}</span>}
+                  <span className="dmc-icon">{icon}</span>
+                  <span className="dmc-label">{label}</span>
+                  <span className="dmc-desc">{desc}</span>
+                </button>
+              ))}
+            </div>
+          </>
+        )}
 
-            <div className="tab-group-sep" />
-
-            {/* ── INSIGHTS ── */}
-            <span className="tab-group-label">Insights</span>
-            <button className={`tab ${activeTab === 'analytics' ? 'active' : ''}`}
-              onClick={() => setActiveTab('analytics')}>
-              📊 Analytics
-            </button>
-            <button className={`tab ${activeTab === 'feedback' ? 'active' : ''}`}
-              onClick={() => setActiveTab('feedback')}>
-              📝 Feedback ({allFeedback.length})
-            </button>
-            <button className={`tab ${activeTab === 'geofence' ? 'active' : ''}`}
-              onClick={() => setActiveTab('geofence')}>
-              📍 GPS Logs
-            </button>
-            <button className={`tab ${activeTab === 'calendar' ? 'active' : ''}`}
-              onClick={() => setActiveTab('calendar')}>
-              📅 Calendar
-            </button>
-            <button className={`tab ${activeTab === 'notifications' ? 'active' : ''}`}
-              onClick={() => setActiveTab('notifications')}>
-              🔔 Notifications
-            </button>
-            <button className={`tab ${activeTab === 'myaccount' ? 'active' : ''}`}
-              onClick={() => setActiveTab('myaccount')}>
-              👤 My Account
-            </button>
-          </div>
-        </div>
+        {/* ── BACK BUTTON (shown inside any section) ───────────── */}
+        {activeTab !== 'menu' && (
+          <button className="btn-back-menu" onClick={() => setActiveTab('menu')}>← Back to Dashboard</button>
+        )}
 
         {/* ── ANALYTICS TAB ──────────────────────────────────── */}
         {activeTab === 'analytics' && (
