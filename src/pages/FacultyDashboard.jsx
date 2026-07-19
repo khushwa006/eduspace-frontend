@@ -16,7 +16,7 @@ import MyAccount from '../components/MyAccount';
 import '../components/MyAccount.css';
 
 export default function FacultyDashboard() {
-  const [activeTab, setActiveTab] = useState('requests');
+  const [activeTab, setActiveTab] = useState('menu');
   const [myRequests, setMyRequests] = useState([]);
   const [myBookings, setMyBookings] = useState([]);
   const [rooms, setRooms] = useState([]);
@@ -214,40 +214,30 @@ export default function FacultyDashboard() {
           </div>
         )}
 
-        {/* Tabs */}
-        <div className="tabs-section">
-          <div className="tabs">
-            {/* ── DAILY ── */}
-            <span className="tab-group-label">Daily</span>
-            <button
-              className={`tab ${activeTab==='attendance'?'active':''}`}
-              onClick={() => setActiveTab('attendance')}>
-              ✅ Attendance{selectedClass ? ` — ${selectedClass.subject_name}` : ''}
-            </button>
-            <button className={`tab ${activeTab==='timetable'?'active':''}`}
-              onClick={() => setActiveTab('timetable')}>
-              🗓️ My Timetable
-            </button>
-            <div className="tab-group-sep" />
-            {/* ── BOOKINGS ── */}
-            <span className="tab-group-label">Rooms</span>
-            <button className={`tab ${activeTab==='bookings'?'active':''}`}
-              onClick={() => setActiveTab('bookings')}>
-              📅 Room Bookings {myRequests.length > 0 && `(${myRequests.length})`}
-            </button>
-            <div className="tab-group-sep" />
-            {/* ── ACCOUNT ── */}
-            <span className="tab-group-label">Me</span>
-            <button className={`tab ${activeTab==='myaccount'?'active':''}`}
-              onClick={() => setActiveTab('myaccount')}>
-              👤 My Account
-            </button>
-            <button className={`tab ${activeTab==='holidays'?'active':''}`}
-              onClick={() => setActiveTab('holidays')}>
-              📅 Holidays
-            </button>
+        {/* ── DASHBOARD LANDING MENU ───────────────────────────── */}
+        {activeTab === 'menu' && (
+          <div className="dash-menu-grid">
+            {[
+              { key: 'attendance', icon: '✅', label: selectedClass ? `Attendance — ${selectedClass.subject_name}` : 'Attendance', desc: 'Mark today\'s class attendance' },
+              { key: 'timetable',  icon: '🗓️', label: 'My Timetable', desc: 'View your class schedule' },
+              { key: 'bookings',   icon: '📅', label: 'Room Bookings', desc: 'Request & track room bookings', badge: myRequests.length },
+              { key: 'myaccount',  icon: '👤', label: 'My Account',    desc: 'Profile & security settings' },
+              { key: 'holidays',   icon: '📅', label: 'Holidays',      desc: 'Non-working days' },
+            ].map(({ key, icon, label, desc, badge }) => (
+              <button key={key} className="dash-menu-card" onClick={() => setActiveTab(key)}>
+                {badge > 0 && <span className="dmc-badge">{badge}</span>}
+                <span className="dmc-icon">{icon}</span>
+                <span className="dmc-label">{label}</span>
+                <span className="dmc-desc">{desc}</span>
+              </button>
+            ))}
           </div>
-        </div>
+        )}
+
+        {/* ── BACK BUTTON (shown inside any section) ───────────── */}
+        {activeTab !== 'menu' && (
+          <button className="btn-back-menu" onClick={() => setActiveTab('menu')}>← Back to Dashboard</button>
+        )}
 
         {/* ── MY TIMETABLE ─────────────────────────────────────── */}
         {activeTab === 'timetable' && (
