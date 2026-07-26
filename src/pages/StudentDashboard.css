@@ -577,7 +577,7 @@ html, body, #root {
 
 .room-item {
   background: var(--bg-primary);
-  border-radius: 0;
+  border-radius: 10px;
   padding: 18px;
   border: 1px solid var(--border-color);
   transition: all 0.2s ease;
@@ -610,7 +610,7 @@ html, body, #root {
   background: var(--bg-tertiary);
   color: var(--text-secondary);
   padding: 4px 10px;
-  border-radius: 0;
+  border-radius: 6px;
   font-size: 11px;
   font-weight: 600;
   text-transform: uppercase;
@@ -619,7 +619,7 @@ html, body, #root {
 
 .status-badge {
   padding: 4px 10px;
-  border-radius: 0;
+  border-radius: 6px;
   font-size: 11px;
   font-weight: 700;
   border: 1px solid transparent;
@@ -1068,7 +1068,7 @@ html, body, #root {
   align-items: flex-start;
   gap: 0;
   padding: 22px 18px 18px;
-  border-radius: 0;
+  border-radius: 10px;
   border: 1px solid var(--glass-border);
   background: var(--glass-bg);
   backdrop-filter: blur(var(--glass-blur));
@@ -1088,7 +1088,7 @@ html, body, #root {
 .sqa-icon {
   font-size: 22px;
   width: 46px; height: 46px;
-  border-radius: 0;
+  border-radius: 8px;
   display: flex; align-items: center; justify-content: center;
   margin-bottom: 14px;
   flex-shrink: 0;
@@ -1127,7 +1127,7 @@ html, body, #root {
 }
 
 .student-room-card {
-  padding: 16px; border-radius: 0;
+  padding: 16px; border-radius: 10px;
   border: 1px solid var(--glass-border);
   background: var(--glass-bg);
   backdrop-filter: blur(var(--glass-blur));
@@ -1152,7 +1152,7 @@ html, body, #root {
 
 .scs-card {
   display: flex; align-items: center; gap: 14px;
-  padding: 16px; border-radius: 0;
+  padding: 16px; border-radius: 10px;
   border: 1px dashed var(--border-color);
   background: var(--bg-primary);
   opacity: 0.8;
