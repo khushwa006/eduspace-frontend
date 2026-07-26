@@ -761,7 +761,7 @@ export default function StudentDashboard({ onLogout }) {
             </div>
             {loading ? (
               <div className="student-rooms-grid">
-                {[1,2,3,4].map(i => <div key={i} className="skeleton skeleton-card" style={{borderRadius:'14px'}} />)}
+                {[1,2,3,4].map(i => <div key={i} className="skeleton skeleton-card" style={{borderRadius:'0'}} />)}
               </div>
             ) : rooms.filter(r => getOccupancyStatus(r.current_occupancy, r.capacity).status === 'Available').length === 0 ? (
               <div className="empty-state-card">
@@ -771,8 +771,9 @@ export default function StudentDashboard({ onLogout }) {
                 <button className="btn btn-hero-primary" style={{margin:'0 auto'}} onClick={() => setCurrentPage('rooms')}>Explore All Rooms</button>
               </div>
             ) : (
+            <>
             <div className="student-rooms-grid">
-              {rooms.filter(r => getOccupancyStatus(r.current_occupancy, r.capacity).status === 'Available').slice(0, 4).map(room => (
+              {rooms.filter(r => getOccupancyStatus(r.current_occupancy, r.capacity).status === 'Available').slice(0, 8).map(room => (
                 <div key={room.id} className="student-room-card" onClick={() => fetchRoomDetails(room.id)}>
                   <div className="src-top">
                     <span className="src-type">{room.room_type}</span>
@@ -786,6 +787,12 @@ export default function StudentDashboard({ onLogout }) {
                 </div>
               ))}
             </div>
+            {rooms.filter(r => getOccupancyStatus(r.current_occupancy, r.capacity).status === 'Available').length > 8 && (
+              <button className="sqs-refresh" style={{marginTop:'14px'}} onClick={() => setCurrentPage('rooms')}>
+                View all rooms →
+              </button>
+            )}
+            </>
             )}
           </div>
 
