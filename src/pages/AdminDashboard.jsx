@@ -429,14 +429,14 @@ export default function AdminDashboard({ onLogout }) {
             <div className="dash-menu-section-label">Daily</div>
             <div className="dash-menu-grid">
               {[
-                { key: 'pending',    icon: '⏳', label: 'Pending Approvals', desc: 'Review booking requests', badge: pendingRequests.length },
-                { key: 'students',   icon: '🎓', label: 'Students',          desc: 'Manage student accounts', badge: pendingStudents.length },
-                { key: 'faculty',    icon: '👨‍🏫', label: 'Faculty',           desc: 'Manage faculty accounts', badge: pendingFaculty.length },
-                { key: 'grievances', icon: '📋', label: 'Grievances',        desc: 'Handle student complaints', badge: grievanceStats.pending },
-              ].map(({ key, icon, label, desc, badge }) => (
+                { key: 'pending',    icon: '⏳', label: 'Pending Approvals', desc: 'Review booking requests', badge: pendingRequests.length, color: 'rgba(245,158,11,0.18)' },
+                { key: 'students',   icon: '🎓', label: 'Students',          desc: 'Manage student accounts', badge: pendingStudents.length, color: 'rgba(59,130,246,0.18)' },
+                { key: 'faculty',    icon: '👨‍🏫', label: 'Faculty',           desc: 'Manage faculty accounts', badge: pendingFaculty.length, color: 'rgba(124,58,237,0.18)' },
+                { key: 'grievances', icon: '📋', label: 'Grievances',        desc: 'Handle student complaints', badge: grievanceStats.pending, color: 'rgba(249,115,22,0.18)' },
+              ].map(({ key, icon, label, desc, badge, color }) => (
                 <button key={key} className="dash-menu-card" onClick={() => setActiveTab(key)}>
                   {badge > 0 && <span className="dmc-badge">{badge}</span>}
-                  <span className="dmc-icon">{icon}</span>
+                  <span className="dmc-icon" style={{ background: color }}>{icon}</span>
                   <span className="dmc-label">{label}</span>
                   <span className="dmc-desc">{desc}</span>
                 </button>
@@ -446,16 +446,16 @@ export default function AdminDashboard({ onLogout }) {
             <div className="dash-menu-section-label">Manage</div>
             <div className="dash-menu-grid">
               {[
-                { key: 'rooms',            icon: '🏛️', label: 'Rooms',            desc: 'Add & edit campus rooms' },
-                { key: 'timetable',        icon: '🗓️', label: 'Timetable',        desc: 'Manage class schedules' },
-                { key: 'approved',         icon: '✅', label: 'Bookings',         desc: 'All confirmed bookings', badge: allBookings.length },
-                { key: 'facilitybookings', icon: '🏋️', label: 'Facility',         desc: 'Sports & library bookings' },
-                { key: 'holidays',         icon: '📅', label: 'Holidays',         desc: 'Non-working days' },
-                { key: 'lockedaccounts',   icon: '🔒', label: 'Locked Accounts',  desc: 'Unlock & reset passwords', badge: lockedAccounts.length },
-              ].map(({ key, icon, label, desc, badge }) => (
+                { key: 'rooms',            icon: '🏛️', label: 'Rooms',            desc: 'Add & edit campus rooms', color: 'rgba(16,185,129,0.18)' },
+                { key: 'timetable',        icon: '🗓️', label: 'Timetable',        desc: 'Manage class schedules', color: 'rgba(6,182,212,0.18)' },
+                { key: 'approved',         icon: '✅', label: 'Bookings',         desc: 'All confirmed bookings', badge: allBookings.length, color: 'rgba(16,217,153,0.18)' },
+                { key: 'facilitybookings', icon: '🏋️', label: 'Facility',         desc: 'Sports & library bookings', color: 'rgba(236,72,153,0.18)' },
+                { key: 'holidays',         icon: '📅', label: 'Holidays',         desc: 'Non-working days', color: 'rgba(236,72,153,0.18)' },
+                { key: 'lockedaccounts',   icon: '🔒', label: 'Locked Accounts',  desc: 'Unlock & reset passwords', badge: lockedAccounts.length, color: 'rgba(239,68,68,0.18)' },
+              ].map(({ key, icon, label, desc, badge, color }) => (
                 <button key={key} className="dash-menu-card" onClick={() => setActiveTab(key)}>
                   {badge > 0 && <span className="dmc-badge">{badge}</span>}
-                  <span className="dmc-icon">{icon}</span>
+                  <span className="dmc-icon" style={{ background: color }}>{icon}</span>
                   <span className="dmc-label">{label}</span>
                   <span className="dmc-desc">{desc}</span>
                 </button>
@@ -465,16 +465,16 @@ export default function AdminDashboard({ onLogout }) {
             <div className="dash-menu-section-label">Insights</div>
             <div className="dash-menu-grid">
               {[
-                { key: 'analytics',     icon: '📊', label: 'Analytics',     desc: 'Campus usage insights' },
-                { key: 'feedback',      icon: '📝', label: 'Feedback',      desc: 'Student feedback', badge: allFeedback.length },
-                { key: 'geofence',      icon: '📍', label: 'GPS Logs',      desc: 'Check-in location logs' },
-                { key: 'calendar',      icon: '📅', label: 'Calendar',      desc: 'Campus events calendar' },
-                { key: 'notifications', icon: '🔔', label: 'Notifications',desc: 'Send campus-wide alerts' },
-                { key: 'myaccount',     icon: '👤', label: 'My Account',    desc: 'Profile & security settings' },
-              ].map(({ key, icon, label, desc, badge }) => (
+                { key: 'analytics',     icon: '📊', label: 'Analytics',     desc: 'Campus usage insights', color: 'rgba(139,92,246,0.18)' },
+                { key: 'feedback',      icon: '📝', label: 'Feedback',      desc: 'Student feedback', badge: allFeedback.length, color: 'rgba(124,58,237,0.18)' },
+                { key: 'geofence',      icon: '📍', label: 'GPS Logs',      desc: 'Check-in location logs', color: 'rgba(16,217,153,0.18)' },
+                { key: 'calendar',      icon: '📅', label: 'Calendar',      desc: 'Campus events calendar', color: 'rgba(6,182,212,0.18)' },
+                { key: 'notifications', icon: '🔔', label: 'Notifications',desc: 'Send campus-wide alerts', color: 'rgba(245,158,11,0.18)' },
+                { key: 'myaccount',     icon: '👤', label: 'My Account',    desc: 'Profile & security settings', color: 'rgba(59,130,246,0.18)' },
+              ].map(({ key, icon, label, desc, badge, color }) => (
                 <button key={key} className="dash-menu-card" onClick={() => setActiveTab(key)}>
                   {badge > 0 && <span className="dmc-badge">{badge}</span>}
-                  <span className="dmc-icon">{icon}</span>
+                  <span className="dmc-icon" style={{ background: color }}>{icon}</span>
                   <span className="dmc-label">{label}</span>
                   <span className="dmc-desc">{desc}</span>
                 </button>
