@@ -274,6 +274,11 @@ export default function StudentDashboard({ onLogout }) {
     }
   };
 
+  // Sports courts & library seats are booked through the dedicated
+  // "Sports & Library" facility-booking flow, so exclude them from the
+  // general classroom/study-room browsing views to avoid duplication.
+  const isBrowsableRoom = (room) => room.room_type !== 'Sports Facility' && room.room_type !== 'Library Seat';
+
   const fetchRoomDetails = async (roomId) => {
     setLoading(true);
     try {
@@ -620,11 +625,12 @@ export default function StudentDashboard({ onLogout }) {
   }
 
   if (currentPage === 'dashboard') {
-    const totalRooms = rooms.length;
-    const totalOccupancy = rooms.reduce((sum, room) => sum + room.current_occupancy, 0);
-    const totalCapacity = rooms.reduce((sum, room) => sum + room.capacity, 0);
+    const browsableRooms = rooms.filter(isBrowsableRoom);
+    const totalRooms = browsableRooms.length;
+    const totalOccupancy = browsableRooms.reduce((sum, room) => sum + room.current_occupancy, 0);
+    const totalCapacity = browsableRooms.reduce((sum, room) => sum + room.capacity, 0);
     const avgOccupancy = totalCapacity > 0 ? Math.round((totalOccupancy / totalCapacity) * 100) : 0;
-    const availableRooms = rooms.filter(r => getOccupancyStatus(r.current_occupancy, r.capacity).status === 'Available').length;
+    const availableRooms = browsableRooms.filter(r => getOccupancyStatus(r.current_occupancy, r.capacity).status === 'Available').length;
 
     return (
       <div className="dashboard">
@@ -706,10 +712,10 @@ export default function StudentDashboard({ onLogout }) {
               <p>Manage your campus spaces efficiently</p>
               <div className="hero-stats">
                 <span className="hero-stat-chip">
-                  🟢 {rooms.filter(r => getOccupancyStatus(r.current_occupancy, r.capacity).status === 'Available').length} rooms available
+                  🟢 {browsableRooms.filter(r => getOccupancyStatus(r.current_occupancy, r.capacity).status === 'Available').length} rooms available
                 </span>
                 <span className="hero-stat-chip">
-                  🏫 {rooms.length} total spaces
+                  🏫 {browsableRooms.length} total spaces
                 </span>
                 {userProfile.program && (
                   <span className="hero-stat-chip">🎓 {userProfile.program}</span>
@@ -763,7 +769,7 @@ export default function StudentDashboard({ onLogout }) {
               <div className="student-rooms-grid">
                 {[1,2,3,4].map(i => <div key={i} className="skeleton skeleton-card" style={{borderRadius:'0'}} />)}
               </div>
-            ) : rooms.filter(r => getOccupancyStatus(r.current_occupancy, r.capacity).status === 'Available').length === 0 ? (
+            ) : browsableRooms.filter(r => getOccupancyStatus(r.current_occupancy, r.capacity).status === 'Available').length === 0 ? (
               <div className="empty-state-card">
                 <div className="empty-state-icon">🏫</div>
                 <p className="empty-state-title">No rooms available right now</p>
@@ -773,7 +779,7 @@ export default function StudentDashboard({ onLogout }) {
             ) : (
             <>
             <div className="student-rooms-grid">
-              {rooms.filter(r => getOccupancyStatus(r.current_occupancy, r.capacity).status === 'Available').slice(0, 8).map(room => (
+              {browsableRooms.filter(r => getOccupancyStatus(r.current_occupancy, r.capacity).status === 'Available').slice(0, 8).map(room => (
                 <div key={room.id} className="student-room-card" onClick={() => fetchRoomDetails(room.id)}>
                   <div className="src-top">
                     <span className="src-type">{room.room_type}</span>
@@ -787,7 +793,7 @@ export default function StudentDashboard({ onLogout }) {
                 </div>
               ))}
             </div>
-            {rooms.filter(r => getOccupancyStatus(r.current_occupancy, r.capacity).status === 'Available').length > 8 && (
+            {browsableRooms.filter(r => getOccupancyStatus(r.current_occupancy, r.capacity).status === 'Available').length > 8 && (
               <button className="sqs-refresh" style={{marginTop:'14px'}} onClick={() => setCurrentPage('rooms')}>
                 View all rooms →
               </button>
@@ -824,7 +830,7 @@ export default function StudentDashboard({ onLogout }) {
           {loading && <div className="loading-state">Loading rooms...</div>}
 
           <div className="rooms-container">
-            {rooms.map((room) => {
+            {rooms.filter(isBrowsableRoom).map((room) => {
               const occupancyStatus = getOccupancyStatus(room.current_occupancy, room.capacity);
               const occupancyPercent = getOccupancyPercentage(room.current_occupancy, room.capacity);
 
