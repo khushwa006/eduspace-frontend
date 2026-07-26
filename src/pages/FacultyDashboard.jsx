@@ -218,15 +218,15 @@ export default function FacultyDashboard() {
         {activeTab === 'menu' && (
           <div className="dash-menu-grid">
             {[
-              { key: 'attendance', icon: '✅', label: selectedClass ? `Attendance — ${selectedClass.subject_name}` : 'Attendance', desc: 'Mark today\'s class attendance' },
-              { key: 'timetable',  icon: '🗓️', label: 'My Timetable', desc: 'View your class schedule' },
-              { key: 'bookings',   icon: '📅', label: 'Room Bookings', desc: 'Request & track room bookings', badge: myRequests.length },
-              { key: 'myaccount',  icon: '👤', label: 'My Account',    desc: 'Profile & security settings' },
-              { key: 'holidays',   icon: '📅', label: 'Holidays',      desc: 'Non-working days' },
-            ].map(({ key, icon, label, desc, badge }) => (
+              { key: 'attendance', icon: '✅', label: selectedClass ? `Attendance — ${selectedClass.subject_name}` : 'Attendance', desc: 'Mark today\'s class attendance', color: 'rgba(139,92,246,0.18)' },
+              { key: 'timetable',  icon: '🗓️', label: 'My Timetable', desc: 'View your class schedule', color: 'rgba(6,182,212,0.18)' },
+              { key: 'bookings',   icon: '📅', label: 'Room Bookings', desc: 'Request & track room bookings', badge: myRequests.length, color: 'rgba(59,130,246,0.18)' },
+              { key: 'myaccount',  icon: '👤', label: 'My Account',    desc: 'Profile & security settings', color: 'rgba(124,58,237,0.18)' },
+              { key: 'holidays',   icon: '📅', label: 'Holidays',      desc: 'Non-working days', color: 'rgba(236,72,153,0.18)' },
+            ].map(({ key, icon, label, desc, badge, color }) => (
               <button key={key} className="dash-menu-card" onClick={() => setActiveTab(key)}>
                 {badge > 0 && <span className="dmc-badge">{badge}</span>}
-                <span className="dmc-icon">{icon}</span>
+                <span className="dmc-icon" style={{ background: color }}>{icon}</span>
                 <span className="dmc-label">{label}</span>
                 <span className="dmc-desc">{desc}</span>
               </button>
