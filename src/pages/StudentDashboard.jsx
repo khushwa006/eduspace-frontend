@@ -40,6 +40,9 @@ export default function StudentDashboard({ onLogout }) {
   const [feedbackLoading, setFeedbackLoading] = useState(false);
   const [feedbackSuccess, setFeedbackSuccess] = useState('');
   const [rooms, setRooms] = useState([]);
+  const [roomSearch, setRoomSearch] = useState('');
+  const [roomTypeFilter, setRoomTypeFilter] = useState('');
+  const [roomStatusFilter, setRoomStatusFilter] = useState('');
   const [selectedRoom, setSelectedRoom] = useState(null);
   const [roomDetails, setRoomDetails] = useState(null);
   const [loading, setLoading] = useState(false);
@@ -808,6 +811,16 @@ export default function StudentDashboard({ onLogout }) {
   }
 
   if (currentPage === 'rooms') {
+    const browsableRoomsList = rooms.filter(isBrowsableRoom);
+    const roomTypeOptions = [...new Set(browsableRoomsList.map(r => r.room_type).filter(Boolean))];
+    const filteredRoomsList = browsableRoomsList.filter(room => {
+      const q = roomSearch.trim().toLowerCase();
+      const matchesSearch = !q || room.name.toLowerCase().includes(q) || (room.building || '').toLowerCase().includes(q);
+      const matchesType = !roomTypeFilter || room.room_type === roomTypeFilter;
+      const matchesStatus = !roomStatusFilter || getOccupancyStatus(room.current_occupancy, room.capacity).status === roomStatusFilter;
+      return matchesSearch && matchesType && matchesStatus;
+    });
+
     return (
       <div className="dashboard">
         <nav className="navbar">
@@ -826,73 +839,81 @@ export default function StudentDashboard({ onLogout }) {
             <p>Select a room to view details and check in</p>
           </div>
 
+          <div className="rooms-filter-bar">
+            <input
+              type="text"
+              className="form-input"
+              placeholder="🔍 Search by room name or building..."
+              value={roomSearch}
+              onChange={e => setRoomSearch(e.target.value)}
+            />
+            <select className="form-input" value={roomTypeFilter} onChange={e => setRoomTypeFilter(e.target.value)}>
+              <option value="">All Types</option>
+              {roomTypeOptions.map(t => <option key={t} value={t}>{t}</option>)}
+            </select>
+            <select className="form-input" value={roomStatusFilter} onChange={e => setRoomStatusFilter(e.target.value)}>
+              <option value="">All Statuses</option>
+              <option value="Available">Available</option>
+              <option value="Moderate">Moderate</option>
+              <option value="Full">Full</option>
+            </select>
+            {(roomSearch || roomTypeFilter || roomStatusFilter) && (
+              <button className="btn-back" onClick={() => { setRoomSearch(''); setRoomTypeFilter(''); setRoomStatusFilter(''); }}>
+                ✕ Clear
+              </button>
+            )}
+          </div>
+
           {error && <div className="error-banner">{error}</div>}
           {loading && <div className="loading-state">Loading rooms...</div>}
 
+          {!loading && filteredRoomsList.length === 0 ? (
+            <div className="empty-state-card">
+              <div className="empty-state-icon">🔍</div>
+              <p className="empty-state-title">No rooms match your search</p>
+              <p className="empty-state-sub">Try a different name, building, or clear the filters.</p>
+            </div>
+          ) : (
           <div className="rooms-container">
-            {rooms.filter(isBrowsableRoom).map((room) => {
+            {filteredRoomsList.map((room) => {
               const occupancyStatus = getOccupancyStatus(room.current_occupancy, room.capacity);
               const occupancyPercent = getOccupancyPercentage(room.current_occupancy, room.capacity);
 
               return (
-                <div key={room.id} className="room-item">
+                <div key={room.id} className="room-item" onClick={() => fetchRoomDetails(room.id)}>
                   <div className="room-header-row">
-                    <div className="room-title-section">
-                      <h3>{room.name}</h3>
-                      <span className="room-type">{room.type}</span>
-                    </div>
-                    <div 
+                    <span className="room-type">{room.room_type}</span>
+                    <span
                       className="status-badge"
-                      style={{ 
-                        backgroundColor: occupancyStatus.bgColor,
-                        color: occupancyStatus.color
-                      }}
+                      style={{ backgroundColor: occupancyStatus.bgColor, color: occupancyStatus.color }}
                     >
                       {occupancyStatus.status}
-                    </div>
+                    </span>
                   </div>
+
+                  <h3 className="room-item-name">{room.name}</h3>
 
                   <div className="room-details-row">
-                    <div className="detail">
-                      <span className="detail-icon">🏢</span>
-                      <span>{room.building}</span>
-                    </div>
-                    <div className="detail">
-                      <span className="detail-icon">📍</span>
-                      <span>Floor {room.floor}</span>
-                    </div>
-                    <div className="detail">
-                      <span className="detail-icon">👥</span>
-                      <span>{room.capacity} capacity</span>
-                    </div>
+                    <span>{room.building} · Floor {room.floor}</span>
+                    <span>{room.capacity} seats</span>
                   </div>
 
-                  <div className="occupancy-section">
-                    <div className="occupancy-bar-container">
-                      <div className="occupancy-bar">
-                        <div 
-                          className="occupancy-fill"
-                          style={{
-                            width: `${occupancyPercent}%`,
-                            backgroundColor: occupancyStatus.color
-                          }}
-                        ></div>
-                      </div>
-                      <span className="occupancy-text">
-                        {room.current_occupancy}/{room.capacity} ({occupancyPercent}%)
-                      </span>
+                  <div className="occupancy-bar-container">
+                    <div className="occupancy-bar">
+                      <div
+                        className="occupancy-fill"
+                        style={{ width: `${occupancyPercent}%`, backgroundColor: occupancyStatus.color }}
+                      ></div>
                     </div>
-                    <button 
-                      onClick={() => fetchRoomDetails(room.id)}
-                      className="btn btn-view-details"
-                    >
-                      View Details
-                    </button>
+                    <span className="occupancy-text">
+                      {room.current_occupancy}/{room.capacity} ({occupancyPercent}%)
+                    </span>
                   </div>
                 </div>
               );
             })}
           </div>
+          )}
         </div>
       </div>
     );
