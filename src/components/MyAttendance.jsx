@@ -7,6 +7,23 @@ const STATUS_CONFIG = {
   LATE:    { label: 'Late',    color: '#f59e0b', bg: '#2d1f00', icon: '🕐' },
 };
 
+// Backend timestamps are stored/returned in UTC. Convert to the
+// viewer's local timezone instead of printing the raw string
+// (otherwise IST users see a time ~5.5 hours behind reality).
+const formatLocalTime = (timestamp) => {
+  if (!timestamp) return '—';
+  // If the backend sends a naive string without a timezone marker
+  // (no 'Z' and no +/-offset), treat it as UTC explicitly.
+  const hasTz = /Z$|[+-]\d{2}:?\d{2}$/.test(timestamp);
+  const iso = hasTz ? timestamp : `${timestamp.replace(' ', 'T')}Z`;
+  const date = new Date(iso);
+  if (isNaN(date.getTime())) return timestamp; // fallback: show raw value rather than "Invalid Date"
+  return date.toLocaleString(undefined, {
+    day: '2-digit', month: 'short', year: 'numeric',
+    hour: '2-digit', minute: '2-digit'
+  });
+};
+
 export default function MyAttendance({ onBack }) {
   const [data, setData]         = useState(null);
   const [gpsLogs, setGpsLogs]   = useState([]);
@@ -176,7 +193,7 @@ export default function MyAttendance({ onBack }) {
                   </p>
                   <div className="ma-card-meta">
                     <span>📡 {log.distance_m}m from campus centre</span>
-                    <span>🕐 {log.created_at}</span>
+                    <span>🕐 {formatLocalTime(log.created_at)}</span>
                   </div>
                 </div>
               </div>
