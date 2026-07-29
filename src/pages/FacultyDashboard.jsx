@@ -246,8 +246,8 @@ export default function FacultyDashboard() {
           <div className="tab-content" style={{ marginTop: '2rem' }}>
             <h2 style={{ marginBottom: '1rem' }}>Today's Overview</h2>
             <div className="attendance-summary-bar">
-              <div className="att-stat-card" style={{ background: '#fef2f2' }}>
-                <p className="att-stat-value" style={{ color: '#ef4444' }}>
+              <div className="att-stat-card" style={{ background: 'rgba(239,68,68,0.14)', border: '1px solid rgba(239,68,68,0.25)' }}>
+                <p className="att-stat-value" style={{ color: '#f87171' }}>
                   {openClassesToMark.length}
                 </p>
                 <p className="att-stat-label">
@@ -255,15 +255,15 @@ export default function FacultyDashboard() {
                 </p>
               </div>
 
-              <div className="att-stat-card" style={{ background: '#fffbeb' }}>
-                <p className="att-stat-value" style={{ color: '#f59e0b' }}>
+              <div className="att-stat-card" style={{ background: 'rgba(245,158,11,0.14)', border: '1px solid rgba(245,158,11,0.25)' }}>
+                <p className="att-stat-value" style={{ color: '#fbbf24' }}>
                   {pendingRequestsCount}
                 </p>
                 <p className="att-stat-label">Pending booking requests</p>
               </div>
 
-              <div className="att-stat-card" style={{ background: '#eff6ff' }}>
-                <p className="att-stat-value" style={{ color: '#3b82f6' }}>
+              <div className="att-stat-card" style={{ background: 'rgba(59,130,246,0.14)', border: '1px solid rgba(59,130,246,0.25)' }}>
+                <p className="att-stat-value" style={{ color: '#60a5fa' }}>
                   {todaysBookings.length}
                 </p>
                 <p className="att-stat-label">Confirmed booking{todaysBookings.length !== 1 ? 's' : ''} today</p>
