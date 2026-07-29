@@ -1,4 +1,4 @@
-﻿import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import { api } from '../services/api';
 import HolidayCalendar from '../components/HolidayCalendar';
 import '../pages/FacultyAdminDashboard.css';
@@ -67,7 +67,7 @@ export default function FacultyDashboard() {
     }
   };
 
-  // ΓöÇΓöÇ ATTENDANCE (timetable-based) ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
+  // ── ATTENDANCE (timetable-based) ────────────────────────────────
 
   const loadMarkableClasses = async () => {
     setLoadingMarkable(true);
@@ -125,7 +125,7 @@ export default function FacultyDashboard() {
           student_id: r.student_id, status: r.status, auto_status: r.auto_status
         }))
       });
-      setMessage({ type: 'success', text: `Γ£à Attendance saved for ${roster.length} student(s)!` });
+      setMessage({ type: 'success', text: `✅ Attendance saved for ${roster.length} student(s)!` });
       setSelectedClass(null);
       loadMarkableClasses();
     } catch (e) {
@@ -135,7 +135,7 @@ export default function FacultyDashboard() {
     }
   };
 
-  // ΓöÇΓöÇ FORM ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
+  // ── FORM ──────────────────────────────────────────────────────
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
@@ -189,8 +189,8 @@ export default function FacultyDashboard() {
       {/* Navbar */}
       <div className="navbar">
         <div className="navbar-left">
-          <div className="logo">≡ƒÅ½</div>
-          <h1>EduSpace ΓÇô Faculty</h1>
+          <div className="logo">🏫</div>
+          <h1>EduSpace – Faculty</h1>
         </div>
         <div className="navbar-right">
           <ThemeToggle />
@@ -210,19 +210,19 @@ export default function FacultyDashboard() {
           <div className={`alert alert-${message.type}`}>
             {message.text}
             <button onClick={() => setMessage({ type:'', text:'' })}
-              style={{ float:'right', background:'none', border:'none', cursor:'pointer', fontWeight:'bold' }}>Γ£ò</button>
+              style={{ float:'right', background:'none', border:'none', cursor:'pointer', fontWeight:'bold' }}>✕</button>
           </div>
         )}
 
-        {/* ΓöÇΓöÇ DASHBOARD LANDING MENU ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ */}
+        {/* ── DASHBOARD LANDING MENU ───────────────────────────── */}
         {activeTab === 'menu' && (
           <div className="dash-menu-grid">
             {[
-              { key: 'attendance', icon: 'Γ£à', label: selectedClass ? `Attendance ΓÇö ${selectedClass.subject_name}` : 'Attendance', desc: 'Mark today\'s class attendance', color: 'rgba(139,92,246,0.18)' },
-              { key: 'timetable',  icon: '≡ƒùô∩╕Å', label: 'My Timetable', desc: 'View your class schedule', color: 'rgba(6,182,212,0.18)' },
-              { key: 'bookings',   icon: '≡ƒôà', label: 'Room Bookings', desc: 'Request & track room bookings', badge: myRequests.length, color: 'rgba(59,130,246,0.18)' },
-              { key: 'myaccount',  icon: '≡ƒæñ', label: 'My Account',    desc: 'Profile & security settings', color: 'rgba(124,58,237,0.18)' },
-              { key: 'holidays',   icon: '≡ƒôà', label: 'Holidays',      desc: 'Non-working days', color: 'rgba(236,72,153,0.18)' },
+              { key: 'attendance', icon: '✅', label: selectedClass ? `Attendance — ${selectedClass.subject_name}` : 'Attendance', desc: 'Mark today\'s class attendance', color: 'rgba(139,92,246,0.18)' },
+              { key: 'timetable',  icon: '🗓️', label: 'My Timetable', desc: 'View your class schedule', color: 'rgba(6,182,212,0.18)' },
+              { key: 'bookings',   icon: '📅', label: 'Room Bookings', desc: 'Request & track room bookings', badge: myRequests.length, color: 'rgba(59,130,246,0.18)' },
+              { key: 'myaccount',  icon: '👤', label: 'My Account',    desc: 'Profile & security settings', color: 'rgba(124,58,237,0.18)' },
+              { key: 'holidays',   icon: '📅', label: 'Holidays',      desc: 'Non-working days', color: 'rgba(236,72,153,0.18)' },
             ].map(({ key, icon, label, desc, badge, color }) => (
               <button key={key} className="dash-menu-card" onClick={() => setActiveTab(key)}>
                 {badge > 0 && <span className="dmc-badge">{badge}</span>}
@@ -234,39 +234,39 @@ export default function FacultyDashboard() {
           </div>
         )}
 
-        {/* ΓöÇΓöÇ BACK BUTTON (shown inside any section) ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ */}
+        {/* ── BACK BUTTON (shown inside any section) ───────────── */}
         {activeTab !== 'menu' && (
-          <button className="btn-back-menu" onClick={() => setActiveTab('menu')}>ΓåÉ Back to Dashboard</button>
+          <button className="btn-back-menu" onClick={() => setActiveTab('menu')}>← Back to Dashboard</button>
         )}
 
-        {/* ΓöÇΓöÇ MY TIMETABLE ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ */}
+        {/* ── MY TIMETABLE ─────────────────────────────────────── */}
         {activeTab === 'timetable' && (
           <div className="tab-content">
             <Timetable />
           </div>
         )}
 
-        {/* ΓöÇΓöÇ MY ACCOUNT ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ */}
+        {/* ── MY ACCOUNT ───────────────────────────────────────── */}
         {activeTab === 'myaccount' && (
           <div className="tab-content">
             <MyAccount />
           </div>
         )}
 
-        {/* ΓöÇΓöÇ HOLIDAYS ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ */}
+        {/* ── HOLIDAYS ─────────────────────────────────────────── */}
         {activeTab === 'holidays' && (() => {
           const today = new Date().toISOString().split('T')[0];
           const upcoming = holidays.filter(h => h.date >= today);
           const past = holidays.filter(h => h.date < today);
           return (
             <div className="tab-content">
-              <h2>≡ƒôà Holidays</h2>
+              <h2>📅 Holidays</h2>
               <p style={{color:'var(--text-secondary)', marginBottom:'24px', fontSize:'14px'}}>
-                Sundays are a fixed weekly off. These dates are also non-working ΓÇö attendance windows
+                Sundays are a fixed weekly off. These dates are also non-working — attendance windows
                 for your classes automatically skip them too (extending to the next actual working day).
               </p>
               {loadingHolidays ? (
-                <p className="empty-state">LoadingΓÇª</p>
+                <p className="empty-state">Loading…</p>
               ) : (
                 <HolidayCalendar holidays={holidays} />
               )}
@@ -274,28 +274,28 @@ export default function FacultyDashboard() {
           );
         })()}
 
-        {/* ΓöÇΓöÇ MY BOOKINGS ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ */}
+        {/* ── MY BOOKINGS ──────────────────────────────────────── */}
         {activeTab === 'bookings' && (
           <div className="tab-content">
-            {/* ΓöÇΓöÇ CONFIRMED BOOKINGS ΓöÇΓöÇ */}
+            {/* ── CONFIRMED BOOKINGS ── */}
             <div className="list-header">
               <div>
-                <h2 className="tab-page-title">≡ƒôà Room Bookings</h2>
+                <h2 className="tab-page-title">📅 Room Bookings</h2>
                 <p className="tab-page-sub">Your confirmed bookings and pending requests</p>
               </div>
               <button className="btn-inline-action" onClick={() => setShowBookingForm(f => !f)}>
-                {showBookingForm ? 'Γ£ò Cancel' : 'Γ₧ò New Request'}
+                {showBookingForm ? '✕ Cancel' : '➕ New Request'}
               </button>
             </div>
 
-            {/* ΓöÇΓöÇ INLINE FORM ΓöÇΓöÇ */}
+            {/* ── INLINE FORM ── */}
             {showBookingForm && (
               <div className="booking-card" style={{marginBottom:'24px'}}>
                 <h3 style={{marginBottom:'16px',fontWeight:700}}>New Booking Request</h3>
                 <form onSubmit={async (e) => { e.preventDefault(); await handleSubmitRequest(e); setShowBookingForm(false); }} className="booking-form">
                   <div className="form-group">
                     <label>Class Name *</label>
-                    <input type="text" name="class_name" placeholder="e.g., Data Structures ΓÇô CS101"
+                    <input type="text" name="class_name" placeholder="e.g., Data Structures – CS101"
                       value={formData.class_name} onChange={handleInputChange} required className="form-input" />
                   </div>
                   <div className="form-row">
@@ -328,13 +328,13 @@ export default function FacultyDashboard() {
                     </div>
                   </div>
                   <button type="submit" disabled={loading} className="btn-submit">
-                    {loading ? 'SubmittingΓÇª' : '≡ƒÜÇ Submit for Approval'}
+                    {loading ? 'Submitting…' : '🚀 Submit for Approval'}
                   </button>
                 </form>
               </div>
             )}
 
-            {/* ΓöÇΓöÇ PENDING REQUESTS ΓöÇΓöÇ */}
+            {/* ── PENDING REQUESTS ── */}
             {myRequests.length > 0 && (
               <>
                 <div className="section-divider">Pending Requests</div>
@@ -348,10 +348,10 @@ export default function FacultyDashboard() {
                         </span>
                       </div>
                       <div className="request-details">
-                        <div className="detail"><span className="label">≡ƒÅó Room</span><span>{req.room_name}</span></div>
-                        <div className="detail"><span className="label">≡ƒôà Date</span><span>{req.date}</span></div>
-                        <div className="detail"><span className="label">ΓÅ░ Time</span><span>{req.time_slot}</span></div>
-                        <div className="detail"><span className="label">≡ƒæÑ Students</span><span>{req.number_of_students}</span></div>
+                        <div className="detail"><span className="label">🏢 Room</span><span>{req.room_name}</span></div>
+                        <div className="detail"><span className="label">📅 Date</span><span>{req.date}</span></div>
+                        <div className="detail"><span className="label">⏰ Time</span><span>{req.time_slot}</span></div>
+                        <div className="detail"><span className="label">👥 Students</span><span>{req.number_of_students}</span></div>
                       </div>
                       {req.status==='REJECTED' && req.rejection_reason && (
                         <div className="rejection-reason"><strong>Rejection:</strong> {req.rejection_reason}</div>
@@ -362,13 +362,13 @@ export default function FacultyDashboard() {
               </>
             )}
 
-            {/* ΓöÇΓöÇ CONFIRMED BOOKINGS ΓöÇΓöÇ */}
+            {/* ── CONFIRMED BOOKINGS ── */}
             <div className="section-divider">Confirmed Bookings</div>
             {myBookings.length === 0 ? (
               <div className="empty-state-card">
-                <div className="empty-state-icon">≡ƒô¡</div>
+                <div className="empty-state-icon">📭</div>
                 <p className="empty-state-title">No confirmed bookings yet</p>
-                <p className="empty-state-sub">Submit a request above ΓÇö admin will approve it and it'll appear here.</p>
+                <p className="empty-state-sub">Submit a request above — admin will approve it and it'll appear here.</p>
               </div>
             ) : (
               <div className="bookings-list">
@@ -379,9 +379,9 @@ export default function FacultyDashboard() {
                       <span className="status-badge badge-approved">CONFIRMED</span>
                     </div>
                     <div className="booking-details">
-                      <div className="detail"><span className="label">≡ƒôì Room</span><span>{booking.room_name}</span></div>
-                      <div className="detail"><span className="label">≡ƒôà Date</span><span>{booking.date}</span></div>
-                      <div className="detail"><span className="label">ΓÅ░ Time</span><span>{booking.time_slot}</span></div>
+                      <div className="detail"><span className="label">📍 Room</span><span>{booking.room_name}</span></div>
+                      <div className="detail"><span className="label">📅 Date</span><span>{booking.date}</span></div>
+                      <div className="detail"><span className="label">⏰ Time</span><span>{booking.time_slot}</span></div>
                     </div>
                   </div>
                 ))}
@@ -390,21 +390,21 @@ export default function FacultyDashboard() {
           </div>
         )}
 
-        {/* ΓöÇΓöÇ ATTENDANCE (timetable-based) ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ */}
+        {/* ── ATTENDANCE (timetable-based) ─────────────────────── */}
         {activeTab === 'attendance' && (
           <div className="tab-content">
             {!selectedClass ? (
               <>
-                <h2>Γ£à Mark Attendance</h2>
+                <h2>✅ Mark Attendance</h2>
                 <p style={{ color:'var(--text-secondary)', marginTop:'4px', marginBottom:'1.25rem' }}>
-                  Only classes that have started ΓÇö and are still within their attendance window
-                  (open until the same time the next day) ΓÇö appear here.
+                  Only classes that have started — and are still within their attendance window
+                  (open until the same time the next day) — appear here.
                 </p>
                 {loadingMarkable ? (
-                  <p className="empty-state">LoadingΓÇª</p>
+                  <p className="empty-state">Loading…</p>
                 ) : markableClasses.length === 0 ? (
                   <div className="empty-state">
-                    <p>≡ƒô¡ No classes are currently open for attendance.</p>
+                    <p>📭 No classes are currently open for attendance.</p>
                     <small>A class becomes markable once it starts, and stays open until the same time the next day.</small>
                   </div>
                 ) : (
@@ -418,12 +418,12 @@ export default function FacultyDashboard() {
                           </span>
                         </div>
                         <div className="booking-details">
-                          <div className="detail"><span className="label">≡ƒÄô Class</span><span>{cls.program} ┬╖ {cls.batch_year} ┬╖ Sec {cls.section}</span></div>
-                          <div className="detail"><span className="label">≡ƒôà Day</span><span>{cls.day_of_week} ({cls.class_date})</span></div>
-                          <div className="detail"><span className="label">ΓÅ░ Slot</span><span>{cls.slot_name}</span></div>
+                          <div className="detail"><span className="label">🎓 Class</span><span>{cls.program} · {cls.batch_year} · Sec {cls.section}</span></div>
+                          <div className="detail"><span className="label">📅 Day</span><span>{cls.day_of_week} ({cls.class_date})</span></div>
+                          <div className="detail"><span className="label">⏰ Slot</span><span>{cls.slot_name}</span></div>
                         </div>
                         <button className="btn-mark-attendance" onClick={() => openClassAttendance(cls)}>
-                          {cls.already_marked ? 'Γ£Å∩╕Å Edit Attendance' : 'Γ£à Mark Attendance'}
+                          {cls.already_marked ? '✏️ Edit Attendance' : '✅ Mark Attendance'}
                         </button>
                       </div>
                     ))}
@@ -433,21 +433,21 @@ export default function FacultyDashboard() {
             ) : (
               <>
                 <div className="att-override-notice">
-                  Γ£Å∩╕Å <strong>Out of Campus is auto-detected</strong> from GPS check-ins. You can override any
-                  student's status below ΓÇö e.g. mark a genuine Out of Campus case as Present. Saving will overwrite previous records.
+                  ✏️ <strong>Out of Campus is auto-detected</strong> from GPS check-ins. You can override any
+                  student's status below — e.g. mark a genuine Out of Campus case as Present. Saving will overwrite previous records.
                   {windowClosesAt && <> Window closes at <strong>{new Date(windowClosesAt).toLocaleString()}</strong>.</>}
                 </div>
 
                 {/* Header */}
                 <div style={{ display:'flex', justifyContent:'space-between', alignItems:'flex-start', flexWrap:'wrap', gap:'1rem', marginBottom:'1.5rem' }}>
                   <div>
-                    <h2>Γ£à {selectedClass.subject_name}</h2>
+                    <h2>✅ {selectedClass.subject_name}</h2>
                     <p style={{ color:'var(--text-secondary)', marginTop:'4px' }}>
-                      ≡ƒÄô {selectedClass.program} ┬╖ {selectedClass.batch_year} ┬╖ Sec {selectedClass.section}
-                      &nbsp;|&nbsp; ≡ƒôà {rosterClassDate} &nbsp;|&nbsp; ΓÅ░ {selectedClass.slot_name}
+                      🎓 {selectedClass.program} · {selectedClass.batch_year} · Sec {selectedClass.section}
+                      &nbsp;|&nbsp; 📅 {rosterClassDate} &nbsp;|&nbsp; ⏰ {selectedClass.slot_name}
                     </p>
                   </div>
-                  <button className="btn-cancel" onClick={() => setSelectedClass(null)}>ΓåÉ Back</button>
+                  <button className="btn-cancel" onClick={() => setSelectedClass(null)}>← Back</button>
                 </div>
 
                 {/* Summary cards */}
@@ -467,18 +467,18 @@ export default function FacultyDashboard() {
 
                 {/* Toolbar */}
                 <div className="attendance-toolbar">
-                  <input className="att-search" type="text" placeholder="≡ƒöì Search by name or emailΓÇª"
+                  <input className="att-search" type="text" placeholder="🔍 Search by name or email…"
                     value={searchStudent} onChange={e => setSearchStudent(e.target.value)} />
-                  <button className="btn-bulk-present" onClick={() => markAll('present')}>Γ£à All Present</button>
-                  <button className="btn-bulk-absent"  onClick={() => markAll('absent')}>Γ¥î All Absent</button>
+                  <button className="btn-bulk-present" onClick={() => markAll('present')}>✅ All Present</button>
+                  <button className="btn-bulk-absent"  onClick={() => markAll('absent')}>❌ All Absent</button>
                 </div>
 
                 {/* Student list */}
                 {loadingRoster ? (
-                  <p className="empty-state">Loading rosterΓÇª</p>
+                  <p className="empty-state">Loading roster…</p>
                 ) : roster.length === 0 ? (
                   <div className="no-students-placeholder">
-                    <p>ΓÜá∩╕Å No approved students found for this Program / Batch / Section.</p>
+                    <p>⚠️ No approved students found for this Program / Batch / Section.</p>
                     <small>Students must be registered, with role "Student" and approved by admin, to appear here.</small>
                   </div>
                 ) : (
@@ -494,16 +494,16 @@ export default function FacultyDashboard() {
                             <p className="student-email">
                               {student.email}
                               {student.auto_status === 'out_of_campus' && student.status !== 'out_of_campus' && (
-                                <span style={{ color:'#f59e0b', fontWeight:600 }}> ┬╖ overridden from auto Out of Campus</span>
+                                <span style={{ color:'#f59e0b', fontWeight:600 }}> · overridden from auto Out of Campus</span>
                               )}
                             </p>
                           </div>
                         </div>
                         <div className="att-status-btns">
                           {[
-                            { s:'present', icon:'Γ£à', label:'Present' },
-                            { s:'absent', icon:'Γ¥î', label:'Absent' },
-                            { s:'out_of_campus', icon:'≡ƒôì', label:'Out of Campus' },
+                            { s:'present', icon:'✅', label:'Present' },
+                            { s:'absent', icon:'❌', label:'Absent' },
+                            { s:'out_of_campus', icon:'📍', label:'Out of Campus' },
                           ].map(({ s, icon, label }) => (
                             <button key={s}
                               className={`att-btn ${student.status===s ? `active-${s}` : ''}`}
@@ -523,7 +523,7 @@ export default function FacultyDashboard() {
                   <button className="btn-save-attendance"
                     disabled={savingAttendance || roster.length === 0}
                     onClick={saveAttendance}>
-                    {savingAttendance ? 'ΓÅ│ SavingΓÇª' : '≡ƒÆ╛ Save Attendance'}
+                    {savingAttendance ? '⏳ Saving…' : '💾 Save Attendance'}
                   </button>
                 </div>
               </>
