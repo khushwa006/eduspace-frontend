@@ -39,7 +39,7 @@ export default function AnalyticsDashboard() {
   const token = localStorage.getItem('jwt_token');
 
   useEffect(() => {
-    fetch('http://localhost:5000/api/admin/analytics', {
+    fetch('https://eduspace-backend-bh29.onrender.com/api/admin/analytics', {
       headers: { 'Authorization': `Bearer ${token}` }
     })
       .then(r => { if (!r.ok) throw new Error('API error ' + r.status); return r.json(); })

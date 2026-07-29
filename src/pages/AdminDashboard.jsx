@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { api } from '../services/api';
 import '../pages/FacultyAdminDashboard.css';
 import ThemeToggle from '../components/ThemeToggle';
@@ -12,7 +12,7 @@ import HolidayCalendar from '../components/HolidayCalendar';
 import '../components/MyAccount.css';
 
 export default function AdminDashboard({ onLogout }) {
-  const [activeTab, setActiveTab] = useState('pending'); // pending, approved, calendar
+  const [activeTab, setActiveTab] = useState('menu'); // menu, pending, approved, calendar, ...
   const [pendingRequests, setPendingRequests] = useState([]);
   const [allBookings, setAllBookings] = useState([]);
   const [user, setUser] = useState(null);
@@ -31,6 +31,7 @@ export default function AdminDashboard({ onLogout }) {
   const [notifSending, setNotifSending] = useState(false);
   const [campusConfig, setCampusConfig] = useState({name:'',latitude:'',longitude:'',radius_m:''});
   const [configSaving, setConfigSaving] = useState(false);
+  const campusConfigDirty = useRef(false); // true while the admin has unsaved edits — blocks the 10s poll from overwriting them
   const [feedbackFilter, setFeedbackFilter] = useState('all');
   const [selectedRequest, setSelectedRequest] = useState(null);
   const [approvalModal, setApprovalModal] = useState(null); // null, approve, reject
@@ -154,7 +155,7 @@ export default function AdminDashboard({ onLogout }) {
       safeGet('/api/admin/all-feedback',    setAllFeedback,    d => Array.isArray(d) ? d : []),
       safeGet('/api/admin/notifications',   setAllNotifs,      d => Array.isArray(d) ? d : []),
       safeGet('/api/admin/geofence-logs',   setGeofenceLogs,   d => Array.isArray(d) ? d : []),
-      safeGet('/api/campus-config',         d => { if (d) setCampusConfig(d); }),
+      safeGet('/api/campus-config',         d => { if (d && !campusConfigDirty.current) setCampusConfig(d); }),
       safeGet('/api/rooms',                 setAllRooms,       d => Array.isArray(d) ? d : []),
       safeGet('/api/admin/grievances',      setAllGrievances,  d => Array.isArray(d) ? d : []),
       safeGet('/api/admin/grievances/stats',setGrievanceStats, d => d || {}),
@@ -422,87 +423,70 @@ export default function AdminDashboard({ onLogout }) {
           </div>
         )}
 
-        {/* Tabs */}
-        <div className="tabs-section">
-          <div className="tabs">
-            {/* ── DAILY ── */}
-            <span className="tab-group-label">Daily</span>
-            <button className={`tab ${activeTab === 'pending' ? 'active' : ''}`}
-              onClick={() => setActiveTab('pending')}>
-              ⏳ Pending Approvals {pendingRequests.length > 0 && <span className="badge-pending" style={{marginLeft:'4px',padding:'2px 7px',fontSize:'11px',animation:'none'}}>{pendingRequests.length}</span>}
-            </button>
-            <button className={`tab ${activeTab === 'students' ? 'active' : ''}`}
-              onClick={() => setActiveTab('students')}>
-              🎓 Students {pendingStudents.length > 0 && `(${pendingStudents.length})`}
-            </button>
-            <button className={`tab ${activeTab === 'faculty' ? 'active' : ''}`}
-              onClick={() => setActiveTab('faculty')}>
-              👨‍🏫 Faculty {pendingFaculty.length > 0 && `(${pendingFaculty.length})`}
-            </button>
-            <button className={`tab ${activeTab === 'grievances' ? 'active' : ''}`}
-              onClick={() => setActiveTab('grievances')}>
-              📋 Grievances {grievanceStats.pending > 0 && `(${grievanceStats.pending})`}
-            </button>
+        {/* ── DASHBOARD LANDING MENU ───────────────────────────── */}
+        {activeTab === 'menu' && (
+          <>
+            <div className="dash-menu-section-label">Daily</div>
+            <div className="dash-menu-grid">
+              {[
+                { key: 'pending',    icon: '⏳', label: 'Pending Approvals', desc: 'Review booking requests', badge: pendingRequests.length, color: 'rgba(245,158,11,0.18)' },
+                { key: 'students',   icon: '🎓', label: 'Students',          desc: 'Manage student accounts', badge: pendingStudents.length, color: 'rgba(59,130,246,0.18)' },
+                { key: 'faculty',    icon: '👨‍🏫', label: 'Faculty',           desc: 'Manage faculty accounts', badge: pendingFaculty.length, color: 'rgba(124,58,237,0.18)' },
+                { key: 'grievances', icon: '📋', label: 'Grievances',        desc: 'Handle student complaints', badge: grievanceStats.pending, color: 'rgba(249,115,22,0.18)' },
+              ].map(({ key, icon, label, desc, badge, color }) => (
+                <button key={key} className="dash-menu-card" onClick={() => setActiveTab(key)}>
+                  {badge > 0 && <span className="dmc-badge">{badge}</span>}
+                  <span className="dmc-icon" style={{ background: color }}>{icon}</span>
+                  <span className="dmc-label">{label}</span>
+                  <span className="dmc-desc">{desc}</span>
+                </button>
+              ))}
+            </div>
 
-            <div className="tab-group-sep" />
+            <div className="dash-menu-section-label">Manage</div>
+            <div className="dash-menu-grid">
+              {[
+                { key: 'rooms',            icon: '🏛️', label: 'Rooms',            desc: 'Add & edit campus rooms', color: 'rgba(16,185,129,0.18)' },
+                { key: 'timetable',        icon: '🗓️', label: 'Timetable',        desc: 'Manage class schedules', color: 'rgba(6,182,212,0.18)' },
+                { key: 'approved',         icon: '✅', label: 'Bookings',         desc: 'All confirmed bookings', badge: allBookings.length, color: 'rgba(16,217,153,0.18)' },
+                { key: 'facilitybookings', icon: '🏋️', label: 'Facility',         desc: 'Sports & library bookings', color: 'rgba(236,72,153,0.18)' },
+                { key: 'holidays',         icon: '📅', label: 'Holidays',         desc: 'Non-working days', color: 'rgba(236,72,153,0.18)' },
+                { key: 'lockedaccounts',   icon: '🔒', label: 'Locked Accounts',  desc: 'Unlock & reset passwords', badge: lockedAccounts.length, color: 'rgba(239,68,68,0.18)' },
+              ].map(({ key, icon, label, desc, badge, color }) => (
+                <button key={key} className="dash-menu-card" onClick={() => setActiveTab(key)}>
+                  {badge > 0 && <span className="dmc-badge">{badge}</span>}
+                  <span className="dmc-icon" style={{ background: color }}>{icon}</span>
+                  <span className="dmc-label">{label}</span>
+                  <span className="dmc-desc">{desc}</span>
+                </button>
+              ))}
+            </div>
 
-            {/* ── MANAGE ── */}
-            <span className="tab-group-label">Manage</span>
-            <button className={`tab ${activeTab === 'rooms' ? 'active' : ''}`}
-              onClick={() => setActiveTab('rooms')}>
-              🏛️ Rooms
-            </button>
-            <button className={`tab ${activeTab === 'timetable' ? 'active' : ''}`}
-              onClick={() => setActiveTab('timetable')}>
-              🗓️ Timetable
-            </button>
-            <button className={`tab ${activeTab === 'approved' ? 'active' : ''}`}
-              onClick={() => setActiveTab('approved')}>
-              ✅ Bookings ({allBookings.length})
-            </button>
-            <button className={`tab ${activeTab === 'facilitybookings' ? 'active' : ''}`}
-              onClick={() => setActiveTab('facilitybookings')}>
-              🏋️ Facility
-            </button>
-            <button className={`tab ${activeTab === 'holidays' ? 'active' : ''}`}
-              onClick={() => setActiveTab('holidays')}>
-              📅 Holidays
-            </button>
-            <button className={`tab ${activeTab === 'lockedaccounts' ? 'active' : ''}`}
-              onClick={() => setActiveTab('lockedaccounts')}>
-              🔒 Locked {lockedAccounts.length > 0 && `(${lockedAccounts.length})`}
-            </button>
+            <div className="dash-menu-section-label">Insights</div>
+            <div className="dash-menu-grid">
+              {[
+                { key: 'analytics',     icon: '📊', label: 'Analytics',     desc: 'Campus usage insights', color: 'rgba(139,92,246,0.18)' },
+                { key: 'feedback',      icon: '📝', label: 'Feedback',      desc: 'Student feedback', badge: allFeedback.length, color: 'rgba(124,58,237,0.18)' },
+                { key: 'geofence',      icon: '📍', label: 'GPS Logs',      desc: 'Check-in location logs', color: 'rgba(16,217,153,0.18)' },
+                { key: 'calendar',      icon: '📅', label: 'Calendar',      desc: 'Campus events calendar', color: 'rgba(6,182,212,0.18)' },
+                { key: 'notifications', icon: '🔔', label: 'Notifications',desc: 'Send campus-wide alerts', color: 'rgba(245,158,11,0.18)' },
+                { key: 'myaccount',     icon: '👤', label: 'My Account',    desc: 'Profile & security settings', color: 'rgba(59,130,246,0.18)' },
+              ].map(({ key, icon, label, desc, badge, color }) => (
+                <button key={key} className="dash-menu-card" onClick={() => setActiveTab(key)}>
+                  {badge > 0 && <span className="dmc-badge">{badge}</span>}
+                  <span className="dmc-icon" style={{ background: color }}>{icon}</span>
+                  <span className="dmc-label">{label}</span>
+                  <span className="dmc-desc">{desc}</span>
+                </button>
+              ))}
+            </div>
+          </>
+        )}
 
-            <div className="tab-group-sep" />
-
-            {/* ── INSIGHTS ── */}
-            <span className="tab-group-label">Insights</span>
-            <button className={`tab ${activeTab === 'analytics' ? 'active' : ''}`}
-              onClick={() => setActiveTab('analytics')}>
-              📊 Analytics
-            </button>
-            <button className={`tab ${activeTab === 'feedback' ? 'active' : ''}`}
-              onClick={() => setActiveTab('feedback')}>
-              📝 Feedback ({allFeedback.length})
-            </button>
-            <button className={`tab ${activeTab === 'geofence' ? 'active' : ''}`}
-              onClick={() => setActiveTab('geofence')}>
-              📍 GPS Logs
-            </button>
-            <button className={`tab ${activeTab === 'calendar' ? 'active' : ''}`}
-              onClick={() => setActiveTab('calendar')}>
-              📅 Calendar
-            </button>
-            <button className={`tab ${activeTab === 'notifications' ? 'active' : ''}`}
-              onClick={() => setActiveTab('notifications')}>
-              🔔 Notifications
-            </button>
-            <button className={`tab ${activeTab === 'myaccount' ? 'active' : ''}`}
-              onClick={() => setActiveTab('myaccount')}>
-              👤 My Account
-            </button>
-          </div>
-        </div>
+        {/* ── BACK BUTTON (shown inside any section) ───────────── */}
+        {activeTab !== 'menu' && (
+          <button className="btn-back-menu" onClick={() => setActiveTab('menu')}>← Back to Dashboard</button>
+        )}
 
         {/* ── ANALYTICS TAB ──────────────────────────────────── */}
         {activeTab === 'analytics' && (
@@ -1109,7 +1093,7 @@ export default function AdminDashboard({ onLogout }) {
                 <div key={key} className="form-group">
                   <label style={{fontSize:'12px',fontWeight:700,color:'var(--text-secondary)',textTransform:'uppercase'}}>{label}</label>
                   <input type={type} className="form-input" value={campusConfig[key] || ''}
-                    onChange={e => setCampusConfig(c => ({...c, [key]: e.target.value}))} />
+                    onChange={e => { campusConfigDirty.current = true; setCampusConfig(c => ({...c, [key]: e.target.value})); }} />
                 </div>
               ))}
             </div>
@@ -1119,6 +1103,7 @@ export default function AdminDashboard({ onLogout }) {
                 setConfigSaving(true);
                 try {
                   await api.post('/api/admin/campus-config', campusConfig);
+                  campusConfigDirty.current = false;
                   setMessage({type:'success', text:'Campus location updated!'});
                 } catch { setMessage({type:'error', text:'Failed to update'}); }
                 setConfigSaving(false);

@@ -40,6 +40,9 @@ export default function StudentDashboard({ onLogout }) {
   const [feedbackLoading, setFeedbackLoading] = useState(false);
   const [feedbackSuccess, setFeedbackSuccess] = useState('');
   const [rooms, setRooms] = useState([]);
+  const [roomSearch, setRoomSearch] = useState('');
+  const [roomTypeFilter, setRoomTypeFilter] = useState('');
+  const [roomStatusFilter, setRoomStatusFilter] = useState('');
   const [selectedRoom, setSelectedRoom] = useState(null);
   const [roomDetails, setRoomDetails] = useState(null);
   const [loading, setLoading] = useState(false);
@@ -88,7 +91,7 @@ export default function StudentDashboard({ onLogout }) {
   useEffect(() => {
     if (!showHolidays) return;
     setHolidaysLoading(true);
-    fetch('http://localhost:5000/api/admin/holidays', {
+    fetch('https://eduspace-backend-bh29.onrender.com/api/admin/holidays', {
       headers: { 'Authorization': `Bearer ${localStorage.getItem('jwt_token')}` }
     })
       .then(r => r.json())
@@ -131,7 +134,7 @@ export default function StudentDashboard({ onLogout }) {
       const token = localStorage.getItem('jwt_token');
       if (!token) return;
 
-      const response = await fetch('http://localhost:5000/api/auth/profile', {
+      const response = await fetch('https://eduspace-backend-bh29.onrender.com/api/auth/profile', {
         headers: {
           'Authorization': `Bearer ${token}`
         }
@@ -168,7 +171,7 @@ export default function StudentDashboard({ onLogout }) {
     if (digits) setUserProfile(prev => ({ ...prev, phone: digits }));
     try {
       const token = localStorage.getItem('jwt_token');
-      const response = await fetch('http://localhost:5000/api/auth/profile', {
+      const response = await fetch('https://eduspace-backend-bh29.onrender.com/api/auth/profile', {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
@@ -207,7 +210,7 @@ export default function StudentDashboard({ onLogout }) {
 
     try {
       const token = localStorage.getItem('jwt_token');
-      const response = await fetch('http://localhost:5000/api/auth/change-password', {
+      const response = await fetch('https://eduspace-backend-bh29.onrender.com/api/auth/change-password', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -240,7 +243,7 @@ export default function StudentDashboard({ onLogout }) {
     setTwoFaError('');
     try {
       const token = localStorage.getItem('jwt_token');
-      const res = await fetch('http://localhost:5000/api/auth/2fa/toggle', {
+      const res = await fetch('https://eduspace-backend-bh29.onrender.com/api/auth/2fa/toggle', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
         body: JSON.stringify({ password: twoFaPassword, enable })
@@ -274,6 +277,11 @@ export default function StudentDashboard({ onLogout }) {
     }
   };
 
+  // Sports courts & library seats are booked through the dedicated
+  // "Sports & Library" facility-booking flow, so exclude them from the
+  // general classroom/study-room browsing views to avoid duplication.
+  const isBrowsableRoom = (room) => room.room_type !== 'Sports Facility' && room.room_type !== 'Library Seat';
+
   const fetchRoomDetails = async (roomId) => {
     setLoading(true);
     try {
@@ -299,7 +307,7 @@ export default function StudentDashboard({ onLogout }) {
       async (pos) => {
         try {
           const token = localStorage.getItem('jwt_token');
-          const res = await fetch('http://localhost:5000/api/attendance/geofence', {
+          const res = await fetch('https://eduspace-backend-bh29.onrender.com/api/attendance/geofence', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
             body: JSON.stringify({ latitude: pos.coords.latitude, longitude: pos.coords.longitude })
@@ -363,7 +371,7 @@ export default function StudentDashboard({ onLogout }) {
     setFeedbackLoading(true);
     try {
       const token = localStorage.getItem('jwt_token');
-      const res = await fetch('http://localhost:5000/api/feedback', {
+      const res = await fetch('https://eduspace-backend-bh29.onrender.com/api/feedback', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
         body: JSON.stringify(data)
@@ -388,7 +396,7 @@ export default function StudentDashboard({ onLogout }) {
     reader.onload = async (ev) => {
       const base64 = ev.target.result;
       const token = localStorage.getItem('jwt_token');
-      const res = await fetch('http://localhost:5000/api/auth/profile/photo', {
+      const res = await fetch('https://eduspace-backend-bh29.onrender.com/api/auth/profile/photo', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
         body: JSON.stringify({ photo: base64 })
@@ -406,7 +414,7 @@ export default function StudentDashboard({ onLogout }) {
   const handleRemovePhoto = async () => {
     if (!window.confirm('Remove your profile photo?')) return;
     const token = localStorage.getItem('jwt_token');
-    await fetch('http://localhost:5000/api/auth/profile/photo', {
+    await fetch('https://eduspace-backend-bh29.onrender.com/api/auth/profile/photo', {
       method: 'DELETE',
       headers: { 'Authorization': `Bearer ${token}` }
     });
@@ -620,11 +628,12 @@ export default function StudentDashboard({ onLogout }) {
   }
 
   if (currentPage === 'dashboard') {
-    const totalRooms = rooms.length;
-    const totalOccupancy = rooms.reduce((sum, room) => sum + room.current_occupancy, 0);
-    const totalCapacity = rooms.reduce((sum, room) => sum + room.capacity, 0);
+    const browsableRooms = rooms.filter(isBrowsableRoom);
+    const totalRooms = browsableRooms.length;
+    const totalOccupancy = browsableRooms.reduce((sum, room) => sum + room.current_occupancy, 0);
+    const totalCapacity = browsableRooms.reduce((sum, room) => sum + room.capacity, 0);
     const avgOccupancy = totalCapacity > 0 ? Math.round((totalOccupancy / totalCapacity) * 100) : 0;
-    const availableRooms = rooms.filter(r => getOccupancyStatus(r.current_occupancy, r.capacity).status === 'Available').length;
+    const availableRooms = browsableRooms.filter(r => getOccupancyStatus(r.current_occupancy, r.capacity).status === 'Available').length;
 
     return (
       <div className="dashboard">
@@ -706,10 +715,10 @@ export default function StudentDashboard({ onLogout }) {
               <p>Manage your campus spaces efficiently</p>
               <div className="hero-stats">
                 <span className="hero-stat-chip">
-                  🟢 {rooms.filter(r => getOccupancyStatus(r.current_occupancy, r.capacity).status === 'Available').length} rooms available
+                  🟢 {browsableRooms.filter(r => getOccupancyStatus(r.current_occupancy, r.capacity).status === 'Available').length} rooms available
                 </span>
                 <span className="hero-stat-chip">
-                  🏫 {rooms.length} total spaces
+                  🏫 {browsableRooms.length} total spaces
                 </span>
                 {userProfile.program && (
                   <span className="hero-stat-chip">🎓 {userProfile.program}</span>
@@ -761,9 +770,9 @@ export default function StudentDashboard({ onLogout }) {
             </div>
             {loading ? (
               <div className="student-rooms-grid">
-                {[1,2,3,4].map(i => <div key={i} className="skeleton skeleton-card" style={{borderRadius:'14px'}} />)}
+                {[1,2,3,4].map(i => <div key={i} className="skeleton skeleton-card" style={{borderRadius:'0'}} />)}
               </div>
-            ) : rooms.filter(r => getOccupancyStatus(r.current_occupancy, r.capacity).status === 'Available').length === 0 ? (
+            ) : browsableRooms.filter(r => getOccupancyStatus(r.current_occupancy, r.capacity).status === 'Available').length === 0 ? (
               <div className="empty-state-card">
                 <div className="empty-state-icon">🏫</div>
                 <p className="empty-state-title">No rooms available right now</p>
@@ -771,8 +780,9 @@ export default function StudentDashboard({ onLogout }) {
                 <button className="btn btn-hero-primary" style={{margin:'0 auto'}} onClick={() => setCurrentPage('rooms')}>Explore All Rooms</button>
               </div>
             ) : (
+            <>
             <div className="student-rooms-grid">
-              {rooms.filter(r => getOccupancyStatus(r.current_occupancy, r.capacity).status === 'Available').slice(0, 4).map(room => (
+              {browsableRooms.filter(r => getOccupancyStatus(r.current_occupancy, r.capacity).status === 'Available').slice(0, 8).map(room => (
                 <div key={room.id} className="student-room-card" onClick={() => fetchRoomDetails(room.id)}>
                   <div className="src-top">
                     <span className="src-type">{room.room_type}</span>
@@ -786,6 +796,12 @@ export default function StudentDashboard({ onLogout }) {
                 </div>
               ))}
             </div>
+            {browsableRooms.filter(r => getOccupancyStatus(r.current_occupancy, r.capacity).status === 'Available').length > 8 && (
+              <button className="sqs-refresh" style={{marginTop:'14px'}} onClick={() => setCurrentPage('rooms')}>
+                View all rooms →
+              </button>
+            )}
+            </>
             )}
           </div>
 
@@ -795,6 +811,16 @@ export default function StudentDashboard({ onLogout }) {
   }
 
   if (currentPage === 'rooms') {
+    const browsableRoomsList = rooms.filter(isBrowsableRoom);
+    const roomTypeOptions = [...new Set(browsableRoomsList.map(r => r.room_type).filter(Boolean))];
+    const filteredRoomsList = browsableRoomsList.filter(room => {
+      const q = roomSearch.trim().toLowerCase();
+      const matchesSearch = !q || room.name.toLowerCase().includes(q) || (room.building || '').toLowerCase().includes(q);
+      const matchesType = !roomTypeFilter || room.room_type === roomTypeFilter;
+      const matchesStatus = !roomStatusFilter || getOccupancyStatus(room.current_occupancy, room.capacity).status === roomStatusFilter;
+      return matchesSearch && matchesType && matchesStatus;
+    });
+
     return (
       <div className="dashboard">
         <nav className="navbar">
@@ -813,73 +839,81 @@ export default function StudentDashboard({ onLogout }) {
             <p>Select a room to view details and check in</p>
           </div>
 
+          <div className="rooms-filter-bar">
+            <input
+              type="text"
+              className="form-input"
+              placeholder="🔍 Search by room name or building..."
+              value={roomSearch}
+              onChange={e => setRoomSearch(e.target.value)}
+            />
+            <select className="form-input" value={roomTypeFilter} onChange={e => setRoomTypeFilter(e.target.value)}>
+              <option value="">All Types</option>
+              {roomTypeOptions.map(t => <option key={t} value={t}>{t}</option>)}
+            </select>
+            <select className="form-input" value={roomStatusFilter} onChange={e => setRoomStatusFilter(e.target.value)}>
+              <option value="">All Statuses</option>
+              <option value="Available">Available</option>
+              <option value="Moderate">Moderate</option>
+              <option value="Full">Full</option>
+            </select>
+            {(roomSearch || roomTypeFilter || roomStatusFilter) && (
+              <button className="btn-back" onClick={() => { setRoomSearch(''); setRoomTypeFilter(''); setRoomStatusFilter(''); }}>
+                ✕ Clear
+              </button>
+            )}
+          </div>
+
           {error && <div className="error-banner">{error}</div>}
           {loading && <div className="loading-state">Loading rooms...</div>}
 
+          {!loading && filteredRoomsList.length === 0 ? (
+            <div className="empty-state-card">
+              <div className="empty-state-icon">🔍</div>
+              <p className="empty-state-title">No rooms match your search</p>
+              <p className="empty-state-sub">Try a different name, building, or clear the filters.</p>
+            </div>
+          ) : (
           <div className="rooms-container">
-            {rooms.map((room) => {
+            {filteredRoomsList.map((room) => {
               const occupancyStatus = getOccupancyStatus(room.current_occupancy, room.capacity);
               const occupancyPercent = getOccupancyPercentage(room.current_occupancy, room.capacity);
 
               return (
-                <div key={room.id} className="room-item">
+                <div key={room.id} className="room-item" onClick={() => fetchRoomDetails(room.id)}>
                   <div className="room-header-row">
-                    <div className="room-title-section">
-                      <h3>{room.name}</h3>
-                      <span className="room-type">{room.type}</span>
-                    </div>
-                    <div 
+                    <span className="room-type">{room.room_type}</span>
+                    <span
                       className="status-badge"
-                      style={{ 
-                        backgroundColor: occupancyStatus.bgColor,
-                        color: occupancyStatus.color
-                      }}
+                      style={{ backgroundColor: occupancyStatus.bgColor, color: occupancyStatus.color }}
                     >
                       {occupancyStatus.status}
-                    </div>
+                    </span>
                   </div>
+
+                  <h3 className="room-item-name">{room.name}</h3>
 
                   <div className="room-details-row">
-                    <div className="detail">
-                      <span className="detail-icon">🏢</span>
-                      <span>{room.building}</span>
-                    </div>
-                    <div className="detail">
-                      <span className="detail-icon">📍</span>
-                      <span>Floor {room.floor}</span>
-                    </div>
-                    <div className="detail">
-                      <span className="detail-icon">👥</span>
-                      <span>{room.capacity} capacity</span>
-                    </div>
+                    <span>{room.building} · Floor {room.floor}</span>
+                    <span>{room.capacity} seats</span>
                   </div>
 
-                  <div className="occupancy-section">
-                    <div className="occupancy-bar-container">
-                      <div className="occupancy-bar">
-                        <div 
-                          className="occupancy-fill"
-                          style={{
-                            width: `${occupancyPercent}%`,
-                            backgroundColor: occupancyStatus.color
-                          }}
-                        ></div>
-                      </div>
-                      <span className="occupancy-text">
-                        {room.current_occupancy}/{room.capacity} ({occupancyPercent}%)
-                      </span>
+                  <div className="occupancy-bar-container">
+                    <div className="occupancy-bar">
+                      <div
+                        className="occupancy-fill"
+                        style={{ width: `${occupancyPercent}%`, backgroundColor: occupancyStatus.color }}
+                      ></div>
                     </div>
-                    <button 
-                      onClick={() => fetchRoomDetails(room.id)}
-                      className="btn btn-view-details"
-                    >
-                      View Details
-                    </button>
+                    <span className="occupancy-text">
+                      {room.current_occupancy}/{room.capacity} ({occupancyPercent}%)
+                    </span>
                   </div>
                 </div>
               );
             })}
           </div>
+          )}
         </div>
       </div>
     );

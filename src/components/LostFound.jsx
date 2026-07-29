@@ -34,7 +34,7 @@ export default function LostFound({ onBack }) {
   const fetchItems = async () => {
     setLoading(true);
     try {
-      const res = await fetch('http://localhost:5000/api/lost-found', {
+      const res = await fetch('https://eduspace-backend-bh29.onrender.com/api/lost-found', {
         headers: { 'Authorization': `Bearer ${token()}` }
       });
       const data = await res.json();
@@ -50,7 +50,7 @@ export default function LostFound({ onBack }) {
     setError('');
     setSubmitting(true);
     try {
-      const res = await fetch('http://localhost:5000/api/lost-found', {
+      const res = await fetch('https://eduspace-backend-bh29.onrender.com/api/lost-found', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token()}` },
         body: JSON.stringify(form)
@@ -68,7 +68,7 @@ export default function LostFound({ onBack }) {
 
   const handleClaim = async (id) => {
     try {
-      await fetch(`http://localhost:5000/api/lost-found/${id}/claim`, {
+      await fetch(`https://eduspace-backend-bh29.onrender.com/api/lost-found/${id}/claim`, {
         method: 'POST',
         headers: { 'Authorization': `Bearer ${token()}` }
       });
@@ -79,7 +79,7 @@ export default function LostFound({ onBack }) {
   const handleDelete = async (id) => {
     if (!window.confirm('Remove this item?')) return;
     try {
-      await fetch(`http://localhost:5000/api/lost-found/${id}`, {
+      await fetch(`https://eduspace-backend-bh29.onrender.com/api/lost-found/${id}`, {
         method: 'DELETE',
         headers: { 'Authorization': `Bearer ${token()}` }
       });

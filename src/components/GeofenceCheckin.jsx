@@ -12,7 +12,7 @@ export default function GeofenceCheckin({ bookingId, onSuccess }) {
   const token = localStorage.getItem('jwt_token');
 
   useEffect(() => {
-    fetch('http://localhost:5000/api/campus-config', {
+    fetch('https://eduspace-backend-bh29.onrender.com/api/campus-config', {
       headers: { 'Authorization': `Bearer ${token}` }
     }).then(r => r.json()).then(setCampus).catch(() => {});
   }, []);
@@ -31,7 +31,7 @@ export default function GeofenceCheckin({ bookingId, onSuccess }) {
         const { latitude, longitude } = pos.coords;
         setUserCoords({ latitude, longitude });
         try {
-          const res = await fetch('http://localhost:5000/api/attendance/geofence', {
+          const res = await fetch('https://eduspace-backend-bh29.onrender.com/api/attendance/geofence', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
             body: JSON.stringify({ latitude, longitude, booking_id: bookingId })

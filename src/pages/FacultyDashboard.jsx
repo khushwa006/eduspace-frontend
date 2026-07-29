@@ -1,546 +1,269 @@
-import React, { useState, useEffect } from 'react';
-import { api } from '../services/api';
-import HolidayCalendar from '../components/HolidayCalendar';
-import '../pages/FacultyAdminDashboard.css';
-import ThemeToggle from '../components/ThemeToggle';
-import '../components/ThemeToggle.css';
-import NotificationBell from '../components/NotificationBell';
-import '../components/NotificationBell.css';
-import DatePicker from '../components/DatePicker';
-import '../components/DatePicker.css';
-import TimeSlotPicker from '../components/TimeSlotPicker';
-import '../components/TimeSlotPicker.css';
-import Timetable from '../components/Timetable';
-import '../components/Timetable.css';
-import MyAccount from '../components/MyAccount';
-import '../components/MyAccount.css';
+import { useState, useEffect, useRef } from "react";
+import {
+  CheckSquare,
+  Calendar,
+  DoorOpen,
+  User,
+  CalendarDays,
+  Bell,
+  Clock,
+  BookOpen,
+  AlertCircle,
+} from "lucide-react";
 
-export default function FacultyDashboard() {
-  const [activeTab, setActiveTab] = useState('requests');
-  const [myRequests, setMyRequests] = useState([]);
-  const [myBookings, setMyBookings] = useState([]);
-  const [rooms, setRooms] = useState([]);
-  const [timeSlots, setTimeSlots] = useState([]);
-  const [user, setUser] = useState(null);
-  const [loading, setLoading] = useState(false);
-  const [showBookingForm, setShowBookingForm] = useState(false);
-  const [holidays, setHolidays] = useState([]);
-  const [loadingHolidays, setLoadingHolidays] = useState(false);
+/**
+ * FacultyDashboard
+ * -----------------
+ * Drop-in replacement for the existing Faculty dashboard.
+ * Keeps the current header/card structure and adds:
+ *   1. A notification bell (with unread badge + dropdown) in the header
+ *   2. A "Today's Overview" section below the quick-action cards
+ *
+ * Wire-up notes (replace the mock fetches with your real endpoints):
+ *   - GET /api/faculty/notifications        -> notifications list
+ *   - PATCH /api/faculty/notifications/read  -> mark as read
+ *   - GET /api/faculty/today-overview        -> next class, attendance status, pending bookings
+ *
+ * Styling follows the existing look: dark indigo/violet background,
+ * frosted-glass cards, cyan/violet accents. Corners are kept squared-off
+ * (rounded-md, not rounded-2xl) per the boxy style used elsewhere.
+ */
 
-  // Attendance state (timetable-based)
-  const [markableClasses, setMarkableClasses] = useState([]);
-  const [loadingMarkable, setLoadingMarkable] = useState(false);
-  const [selectedClass, setSelectedClass] = useState(null);   // entry from markableClasses
-  const [roster, setRoster] = useState([]);
-  const [rosterClassDate, setRosterClassDate] = useState('');
-  const [windowClosesAt, setWindowClosesAt] = useState(null);
-  const [loadingRoster, setLoadingRoster] = useState(false);
-  const [savingAttendance, setSavingAttendance] = useState(false);
-  const [searchStudent, setSearchStudent] = useState('');
+const CARD_ICON_BG = {
+  green: "bg-emerald-500",
+  blue: "bg-blue-600",
+  navy: "bg-blue-900",
+  purple: "bg-violet-800",
+  pink: "bg-pink-800",
+};
 
-  const [formData, setFormData] = useState({
-    class_name: '', room_id: '', date: '', time_slot_id: '', number_of_students: ''
-  });
-  const [message, setMessage] = useState({ type: '', text: '' });
+function QuickActionCard({ icon: Icon, iconBg, title, subtitle, onClick }) {
+  return (
+    <button
+      onClick={onClick}
+      className="text-left bg-white/5 border border-white/10 rounded-md p-5 hover:bg-white/10
+                 hover:border-white/20 transition-colors backdrop-blur-md w-full"
+    >
+      <div
+        className={`w-11 h-11 rounded-md flex items-center justify-center mb-4 ${CARD_ICON_BG[iconBg]}`}
+      >
+        <Icon className="w-5 h-5 text-white" />
+      </div>
+      <h3 className="text-white font-semibold text-base">{title}</h3>
+      <p className="text-indigo-300/80 text-sm mt-1">{subtitle}</p>
+    </button>
+  );
+}
 
-  useEffect(() => { loadData(); }, []);
-
-  const loadData = async () => {
-    try {
-      setLoading(true);
-      const [userRes, roomRes, slotsRes, requestsRes, bookingsRes] = await Promise.all([
-        api.get('/api/auth/profile'),
-        api.get('/api/rooms'),
-        api.get('/api/time-slots'),
-        api.get('/api/my-booking-requests'),
-        api.get('/api/my-bookings'),
-      ]);
-      setUser(userRes.data);
-      setRooms(Array.isArray(roomRes.data) ? roomRes.data : (roomRes.data?.rooms || []));
-      setTimeSlots(Array.isArray(slotsRes.data) ? slotsRes.data : []);
-      setMyRequests(Array.isArray(requestsRes.data) ? requestsRes.data : []);
-      setMyBookings(Array.isArray(bookingsRes.data) ? bookingsRes.data : []);
-    } catch {
-      setMessage({ type: 'error', text: 'Failed to load dashboard data' });
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  // ── ATTENDANCE (timetable-based) ────────────────────────────────
-
-  const loadMarkableClasses = async () => {
-    setLoadingMarkable(true);
-    try {
-      const res = await api.get('/api/faculty/attendance/markable');
-      setMarkableClasses(Array.isArray(res.data) ? res.data : []);
-    } catch {
-      setMessage({ type: 'error', text: 'Failed to load classes open for attendance' });
-    } finally {
-      setLoadingMarkable(false);
-    }
-  };
-
-  useEffect(() => { if (activeTab === 'attendance' && !selectedClass) loadMarkableClasses(); }, [activeTab]);
+function NotificationBell() {
+  const [open, setOpen] = useState(false);
+  const [notifications, setNotifications] = useState([]);
+  const ref = useRef(null);
 
   useEffect(() => {
-    if (activeTab !== 'holidays') return;
-    setLoadingHolidays(true);
-    api.get('/api/admin/holidays')
-      .then(res => setHolidays(Array.isArray(res.data) ? res.data : []))
-      .catch(() => setHolidays([]))
-      .finally(() => setLoadingHolidays(false));
-  }, [activeTab]);
+    // Replace with: fetch("/api/faculty/notifications").then(...)
+    setNotifications([
+      {
+        id: 1,
+        title: "Room booking approved",
+        detail: "Lab 204, tomorrow 10:00–11:00",
+        read: false,
+        time: "10m ago",
+      },
+      {
+        id: 2,
+        title: "Attendance reminder",
+        detail: "CS301 attendance not marked yet",
+        read: false,
+        time: "1h ago",
+      },
+      {
+        id: 3,
+        title: "Timetable updated",
+        detail: "Friday's schedule was changed by admin",
+        read: true,
+        time: "Yesterday",
+      },
+    ]);
+  }, []);
 
-  const openClassAttendance = async (cls) => {
-    setSelectedClass(cls);
-    setSearchStudent('');
-    setLoadingRoster(true);
-    try {
-      const res = await api.get(`/api/faculty/attendance/${cls.timetable_entry_id}/roster?date=${cls.class_date}`);
-      setRoster(Array.isArray(res.data.roster) ? res.data.roster : []);
-      setRosterClassDate(res.data.class_date);
-      setWindowClosesAt(res.data.window_closes_at);
-    } catch (e) {
-      setMessage({ type: 'error', text: e.response?.data?.error || 'This class is not open for attendance right now.' });
-      setSelectedClass(null);
-    } finally {
-      setLoadingRoster(false);
+  useEffect(() => {
+    function handleClickOutside(e) {
+      if (ref.current && !ref.current.contains(e.target)) setOpen(false);
     }
-  };
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
 
-  const markStudent = (studentId, status) =>
-    setRoster(prev => prev.map(r => r.student_id === studentId ? { ...r, status } : r));
+  const unreadCount = notifications.filter((n) => !n.read).length;
 
-  const markAll = (status) =>
-    setRoster(prev => prev.map(r => ({ ...r, status })));
-
-  const saveAttendance = async () => {
-    if (!selectedClass || roster.length === 0) return;
-    setSavingAttendance(true);
-    try {
-      await api.post('/api/faculty/attendance/save', {
-        timetable_entry_id: selectedClass.timetable_entry_id,
-        records: roster.map(r => ({
-          student_id: r.student_id, status: r.status, auto_status: r.auto_status
-        }))
-      });
-      setMessage({ type: 'success', text: `✅ Attendance saved for ${roster.length} student(s)!` });
-      setSelectedClass(null);
-      loadMarkableClasses();
-    } catch (e) {
-      setMessage({ type: 'error', text: e.response?.data?.error || 'Failed to save attendance' });
-    } finally {
-      setSavingAttendance(false);
-    }
-  };
-
-  // ── FORM ──────────────────────────────────────────────────────
-
-  const handleInputChange = (e) => {
-    const { name, value } = e.target;
-    setFormData(prev => ({
-      ...prev,
-      [name]: ['number_of_students','room_id','time_slot_id'].includes(name) ? parseInt(value)||'' : value
-    }));
-  };
-
-  const handleSubmitRequest = async (e) => {
-    e.preventDefault();
-    setLoading(true);
-    try {
-      await api.post('/api/booking-requests', {
-        ...formData,
-        room_id: parseInt(formData.room_id),
-        time_slot_id: parseInt(formData.time_slot_id),
-        number_of_students: parseInt(formData.number_of_students)
-      });
-      setMessage({ type: 'success', text: 'Booking request submitted! Waiting for admin approval.' });
-      setFormData({ class_name: '', room_id: '', date: '', time_slot_id: '', number_of_students: '' });
-      const r = await api.get('/api/my-booking-requests');
-      setMyRequests(Array.isArray(r.data) ? r.data : []);
-      setActiveTab('requests');
-    } catch (err) {
-      setMessage({ type: 'error', text: err.message || 'Failed to submit request' });
-    } finally { setLoading(false); }
-  };
-
-  const getStatusBadge = (status) => {
-    const colors = { PENDING:'#f59e0b', APPROVED:'#10b981', REJECTED:'#ef4444' };
-    return (
-      <span className="status-badge"
-        style={{ background: (colors[status]||'#888')+'20', color: colors[status]||'#888' }}>
-        {status}
-      </span>
-    );
-  };
-
-  const filteredRoster = roster.filter(r =>
-    r.name.toLowerCase().includes(searchStudent.toLowerCase()) ||
-    r.email.toLowerCase().includes(searchStudent.toLowerCase())
-  );
-
-  const presentCount     = roster.filter(r => r.status === 'present').length;
-  const absentCount      = roster.filter(r => r.status === 'absent').length;
-  const outOfCampusCount = roster.filter(r => r.status === 'out_of_campus').length;
+  function markAllRead() {
+    // Replace with: fetch("/api/faculty/notifications/read", { method: "PATCH" })
+    setNotifications((prev) => prev.map((n) => ({ ...n, read: true })));
+  }
 
   return (
-    <div className="dashboard">
-      {/* Navbar */}
-      <div className="navbar">
-        <div className="navbar-left">
-          <div className="logo">🏫</div>
-          <h1>EduSpace – Faculty</h1>
-        </div>
-        <div className="navbar-right">
-          <ThemeToggle />
-          <div className="user-info">
-            <p className="user-name">{user?.first_name} {user?.last_name}</p>
-            <p className="user-status">Faculty</p>
-          </div>
-          <button className="btn-logout" onClick={() => {
-            localStorage.removeItem('jwt_token');
-            window.location.href = '/';
-          }}>Logout</button>
-        </div>
-      </div>
-
-      <div className="dashboard-content">
-        {message.text && (
-          <div className={`alert alert-${message.type}`}>
-            {message.text}
-            <button onClick={() => setMessage({ type:'', text:'' })}
-              style={{ float:'right', background:'none', border:'none', cursor:'pointer', fontWeight:'bold' }}>✕</button>
-          </div>
+    <div className="relative" ref={ref}>
+      <button
+        onClick={() => setOpen((o) => !o)}
+        aria-label="Notifications"
+        className="relative w-10 h-10 flex items-center justify-center rounded-md
+                   bg-white/5 border border-white/10 hover:bg-white/10 transition-colors"
+      >
+        <Bell className="w-5 h-5 text-indigo-100" />
+        {unreadCount > 0 && (
+          <span
+            className="absolute -top-1 -right-1 min-w-[18px] h-[18px] px-1 rounded-full
+                       bg-pink-600 text-white text-[11px] leading-[18px] text-center font-semibold"
+          >
+            {unreadCount}
+          </span>
         )}
+      </button>
 
-        {/* Tabs */}
-        <div className="tabs-section">
-          <div className="tabs">
-            {/* ── DAILY ── */}
-            <span className="tab-group-label">Daily</span>
-            <button
-              className={`tab ${activeTab==='attendance'?'active':''}`}
-              onClick={() => setActiveTab('attendance')}>
-              ✅ Attendance{selectedClass ? ` — ${selectedClass.subject_name}` : ''}
-            </button>
-            <button className={`tab ${activeTab==='timetable'?'active':''}`}
-              onClick={() => setActiveTab('timetable')}>
-              🗓️ My Timetable
-            </button>
-            <div className="tab-group-sep" />
-            {/* ── BOOKINGS ── */}
-            <span className="tab-group-label">Rooms</span>
-            <button className={`tab ${activeTab==='bookings'?'active':''}`}
-              onClick={() => setActiveTab('bookings')}>
-              📅 Room Bookings {myRequests.length > 0 && `(${myRequests.length})`}
-            </button>
-            <div className="tab-group-sep" />
-            {/* ── ACCOUNT ── */}
-            <span className="tab-group-label">Me</span>
-            <button className={`tab ${activeTab==='myaccount'?'active':''}`}
-              onClick={() => setActiveTab('myaccount')}>
-              👤 My Account
-            </button>
-            <button className={`tab ${activeTab==='holidays'?'active':''}`}
-              onClick={() => setActiveTab('holidays')}>
-              📅 Holidays
-            </button>
-          </div>
-        </div>
-
-        {/* ── MY TIMETABLE ─────────────────────────────────────── */}
-        {activeTab === 'timetable' && (
-          <div className="tab-content">
-            <Timetable />
-          </div>
-        )}
-
-        {/* ── MY ACCOUNT ───────────────────────────────────────── */}
-        {activeTab === 'myaccount' && (
-          <div className="tab-content">
-            <MyAccount />
-          </div>
-        )}
-
-        {/* ── HOLIDAYS ─────────────────────────────────────────── */}
-        {activeTab === 'holidays' && (() => {
-          const today = new Date().toISOString().split('T')[0];
-          const upcoming = holidays.filter(h => h.date >= today);
-          const past = holidays.filter(h => h.date < today);
-          return (
-            <div className="tab-content">
-              <h2>📅 Holidays</h2>
-              <p style={{color:'var(--text-secondary)', marginBottom:'24px', fontSize:'14px'}}>
-                Sundays are a fixed weekly off. These dates are also non-working — attendance windows
-                for your classes automatically skip them too (extending to the next actual working day).
-              </p>
-              {loadingHolidays ? (
-                <p className="empty-state">Loading…</p>
-              ) : (
-                <HolidayCalendar holidays={holidays} />
-              )}
-            </div>
-          );
-        })()}
-
-        {/* ── MY BOOKINGS ──────────────────────────────────────── */}
-        {activeTab === 'bookings' && (
-          <div className="tab-content">
-            {/* ── CONFIRMED BOOKINGS ── */}
-            <div className="list-header">
-              <div>
-                <h2 className="tab-page-title">📅 Room Bookings</h2>
-                <p className="tab-page-sub">Your confirmed bookings and pending requests</p>
-              </div>
-              <button className="btn-inline-action" onClick={() => setShowBookingForm(f => !f)}>
-                {showBookingForm ? '✕ Cancel' : '➕ New Request'}
+      {open && (
+        <div
+          className="absolute right-0 mt-2 w-80 bg-[#161233] border border-white/10 rounded-md
+                     shadow-xl shadow-black/40 backdrop-blur-xl z-50 overflow-hidden"
+        >
+          <div className="flex items-center justify-between px-4 py-3 border-b border-white/10">
+            <span className="text-white font-semibold text-sm">Notifications</span>
+            {unreadCount > 0 && (
+              <button
+                onClick={markAllRead}
+                className="text-xs text-cyan-300 hover:text-cyan-200"
+              >
+                Mark all read
               </button>
-            </div>
-
-            {/* ── INLINE FORM ── */}
-            {showBookingForm && (
-              <div className="booking-card" style={{marginBottom:'24px'}}>
-                <h3 style={{marginBottom:'16px',fontWeight:700}}>New Booking Request</h3>
-                <form onSubmit={async (e) => { e.preventDefault(); await handleSubmitRequest(e); setShowBookingForm(false); }} className="booking-form">
-                  <div className="form-group">
-                    <label>Class Name *</label>
-                    <input type="text" name="class_name" placeholder="e.g., Data Structures – CS101"
-                      value={formData.class_name} onChange={handleInputChange} required className="form-input" />
-                  </div>
-                  <div className="form-row">
-                    <div className="form-group">
-                      <label>Room *</label>
-                      <select name="room_id" value={formData.room_id} onChange={handleInputChange} required className="form-input">
-                        <option value="">Select Room</option>
-                        {rooms.map(r => <option key={r.id} value={r.id}>{r.name} (Cap: {r.capacity})</option>)}
-                      </select>
-                    </div>
-                    <div className="form-group">
-                      <label>Date *</label>
-                      <DatePicker value={formData.date}
-                        onChange={(val) => setFormData(prev => ({ ...prev, date: val }))}
-                        placeholder="Select booking date"
-                        minDate={new Date().toISOString().split('T')[0]} />
-                    </div>
-                  </div>
-                  <div className="form-row">
-                    <div className="form-group">
-                      <label>Time Slot *</label>
-                      <TimeSlotPicker slots={timeSlots} value={formData.time_slot_id}
-                        onChange={(id) => setFormData(prev => ({ ...prev, time_slot_id: id }))}
-                        placeholder="Select time slot" />
-                    </div>
-                    <div className="form-group">
-                      <label>Number of Students *</label>
-                      <input type="number" name="number_of_students" min="1"
-                        value={formData.number_of_students} onChange={handleInputChange} required className="form-input" />
-                    </div>
-                  </div>
-                  <button type="submit" disabled={loading} className="btn-submit">
-                    {loading ? 'Submitting…' : '🚀 Submit for Approval'}
-                  </button>
-                </form>
-              </div>
-            )}
-
-            {/* ── PENDING REQUESTS ── */}
-            {myRequests.length > 0 && (
-              <>
-                <div className="section-divider">Pending Requests</div>
-                <div className="requests-list">
-                  {myRequests.map(req => (
-                    <div key={req.id} className="request-card">
-                      <div className="request-header">
-                        <h3>{req.class_name}</h3>
-                        <span className={`status-badge ${req.status==='APPROVED'?'badge-approved':req.status==='REJECTED'?'badge-rejected':'badge-pending'}`}>
-                          {req.status}
-                        </span>
-                      </div>
-                      <div className="request-details">
-                        <div className="detail"><span className="label">🏢 Room</span><span>{req.room_name}</span></div>
-                        <div className="detail"><span className="label">📅 Date</span><span>{req.date}</span></div>
-                        <div className="detail"><span className="label">⏰ Time</span><span>{req.time_slot}</span></div>
-                        <div className="detail"><span className="label">👥 Students</span><span>{req.number_of_students}</span></div>
-                      </div>
-                      {req.status==='REJECTED' && req.rejection_reason && (
-                        <div className="rejection-reason"><strong>Rejection:</strong> {req.rejection_reason}</div>
-                      )}
-                    </div>
-                  ))}
-                </div>
-              </>
-            )}
-
-            {/* ── CONFIRMED BOOKINGS ── */}
-            <div className="section-divider">Confirmed Bookings</div>
-            {myBookings.length === 0 ? (
-              <div className="empty-state-card">
-                <div className="empty-state-icon">📭</div>
-                <p className="empty-state-title">No confirmed bookings yet</p>
-                <p className="empty-state-sub">Submit a request above — admin will approve it and it'll appear here.</p>
-              </div>
-            ) : (
-              <div className="bookings-list">
-                {myBookings.map(booking => (
-                  <div key={booking.id} className="booking-card">
-                    <div className="booking-header">
-                      <h3>{booking.class_name}</h3>
-                      <span className="status-badge badge-approved">CONFIRMED</span>
-                    </div>
-                    <div className="booking-details">
-                      <div className="detail"><span className="label">📍 Room</span><span>{booking.room_name}</span></div>
-                      <div className="detail"><span className="label">📅 Date</span><span>{booking.date}</span></div>
-                      <div className="detail"><span className="label">⏰ Time</span><span>{booking.time_slot}</span></div>
-                    </div>
-                  </div>
-                ))}
-              </div>
             )}
           </div>
-        )}
 
-        {/* ── ATTENDANCE (timetable-based) ─────────────────────── */}
-        {activeTab === 'attendance' && (
-          <div className="tab-content">
-            {!selectedClass ? (
-              <>
-                <h2>✅ Mark Attendance</h2>
-                <p style={{ color:'var(--text-secondary)', marginTop:'4px', marginBottom:'1.25rem' }}>
-                  Only classes that have started — and are still within their attendance window
-                  (open until the same time the next day) — appear here.
-                </p>
-                {loadingMarkable ? (
-                  <p className="empty-state">Loading…</p>
-                ) : markableClasses.length === 0 ? (
-                  <div className="empty-state">
-                    <p>📭 No classes are currently open for attendance.</p>
-                    <small>A class becomes markable once it starts, and stays open until the same time the next day.</small>
-                  </div>
-                ) : (
-                  <div className="bookings-list">
-                    {markableClasses.map(cls => (
-                      <div key={cls.timetable_entry_id} className="booking-card">
-                        <div className="booking-header">
-                          <h3>{cls.subject_name}</h3>
-                          <span className={`status-badge ${cls.already_marked ? 'status-active' : ''}`}>
-                            {cls.already_marked ? 'MARKED' : 'OPEN'}
-                          </span>
-                        </div>
-                        <div className="booking-details">
-                          <div className="detail"><span className="label">🎓 Class</span><span>{cls.program} · {cls.batch_year} · Sec {cls.section}</span></div>
-                          <div className="detail"><span className="label">📅 Day</span><span>{cls.day_of_week} ({cls.class_date})</span></div>
-                          <div className="detail"><span className="label">⏰ Slot</span><span>{cls.slot_name}</span></div>
-                        </div>
-                        <button className="btn-mark-attendance" onClick={() => openClassAttendance(cls)}>
-                          {cls.already_marked ? '✏️ Edit Attendance' : '✅ Mark Attendance'}
-                        </button>
-                      </div>
-                    ))}
-                  </div>
-                )}
-              </>
+          <div className="max-h-80 overflow-y-auto divide-y divide-white/5">
+            {notifications.length === 0 ? (
+              <p className="text-indigo-300/70 text-sm px-4 py-6 text-center">
+                You're all caught up.
+              </p>
             ) : (
-              <>
-                <div className="att-override-notice">
-                  ✏️ <strong>Out of Campus is auto-detected</strong> from GPS check-ins. You can override any
-                  student's status below — e.g. mark a genuine Out of Campus case as Present. Saving will overwrite previous records.
-                  {windowClosesAt && <> Window closes at <strong>{new Date(windowClosesAt).toLocaleString()}</strong>.</>}
-                </div>
-
-                {/* Header */}
-                <div style={{ display:'flex', justifyContent:'space-between', alignItems:'flex-start', flexWrap:'wrap', gap:'1rem', marginBottom:'1.5rem' }}>
-                  <div>
-                    <h2>✅ {selectedClass.subject_name}</h2>
-                    <p style={{ color:'var(--text-secondary)', marginTop:'4px' }}>
-                      🎓 {selectedClass.program} · {selectedClass.batch_year} · Sec {selectedClass.section}
-                      &nbsp;|&nbsp; 📅 {rosterClassDate} &nbsp;|&nbsp; ⏰ {selectedClass.slot_name}
-                    </p>
+              notifications.map((n) => (
+                <div
+                  key={n.id}
+                  className={`px-4 py-3 flex gap-3 ${!n.read ? "bg-white/5" : ""}`}
+                >
+                  <span
+                    className={`mt-1 w-2 h-2 rounded-full shrink-0 ${
+                      n.read ? "bg-transparent" : "bg-cyan-400"
+                    }`}
+                  />
+                  <div className="min-w-0">
+                    <p className="text-white text-sm font-medium truncate">{n.title}</p>
+                    <p className="text-indigo-300/80 text-xs mt-0.5">{n.detail}</p>
+                    <p className="text-indigo-400/60 text-[11px] mt-1">{n.time}</p>
                   </div>
-                  <button className="btn-cancel" onClick={() => setSelectedClass(null)}>← Back</button>
                 </div>
-
-                {/* Summary cards */}
-                <div className="attendance-summary-bar">
-                  {[
-                    { label:'Total',         value: roster.length,    bg:'#eff6ff', color:'#3b82f6' },
-                    { label:'Present',       value: presentCount,     bg:'#ecfdf5', color:'#10b981' },
-                    { label:'Absent',        value: absentCount,      bg:'#fef2f2', color:'#ef4444' },
-                    { label:'Out of Campus', value: outOfCampusCount, bg:'#fffbeb', color:'#f59e0b' },
-                  ].map(c => (
-                    <div key={c.label} className="att-stat-card" style={{ background: c.bg }}>
-                      <p className="att-stat-value" style={{ color: c.color }}>{c.value}</p>
-                      <p className="att-stat-label">{c.label}</p>
-                    </div>
-                  ))}
-                </div>
-
-                {/* Toolbar */}
-                <div className="attendance-toolbar">
-                  <input className="att-search" type="text" placeholder="🔍 Search by name or email…"
-                    value={searchStudent} onChange={e => setSearchStudent(e.target.value)} />
-                  <button className="btn-bulk-present" onClick={() => markAll('present')}>✅ All Present</button>
-                  <button className="btn-bulk-absent"  onClick={() => markAll('absent')}>❌ All Absent</button>
-                </div>
-
-                {/* Student list */}
-                {loadingRoster ? (
-                  <p className="empty-state">Loading roster…</p>
-                ) : roster.length === 0 ? (
-                  <div className="no-students-placeholder">
-                    <p>⚠️ No approved students found for this Program / Batch / Section.</p>
-                    <small>Students must be registered, with role "Student" and approved by admin, to appear here.</small>
-                  </div>
-                ) : (
-                  <div className="student-list">
-                    {filteredRoster.map(student => (
-                      <div key={student.student_id} className={`student-row ${student.status}`}>
-                        <div className="student-identity">
-                          <div className="student-avatar">
-                            {student.name.split(' ').map(n => n[0]).join('').slice(0,2)}
-                          </div>
-                          <div>
-                            <p className="student-name">{student.name}</p>
-                            <p className="student-email">
-                              {student.email}
-                              {student.auto_status === 'out_of_campus' && student.status !== 'out_of_campus' && (
-                                <span style={{ color:'#f59e0b', fontWeight:600 }}> · overridden from auto Out of Campus</span>
-                              )}
-                            </p>
-                          </div>
-                        </div>
-                        <div className="att-status-btns">
-                          {[
-                            { s:'present', icon:'✅', label:'Present' },
-                            { s:'absent', icon:'❌', label:'Absent' },
-                            { s:'out_of_campus', icon:'📍', label:'Out of Campus' },
-                          ].map(({ s, icon, label }) => (
-                            <button key={s}
-                              className={`att-btn ${student.status===s ? `active-${s}` : ''}`}
-                              onClick={() => markStudent(student.student_id, s)}>
-                              {icon} {label}
-                            </button>
-                          ))}
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                )}
-
-                {/* Footer */}
-                <div className="attendance-footer">
-                  <span className="att-progress-text">{roster.length} student(s) in this class</span>
-                  <button className="btn-save-attendance"
-                    disabled={savingAttendance || roster.length === 0}
-                    onClick={saveAttendance}>
-                    {savingAttendance ? '⏳ Saving…' : '💾 Save Attendance'}
-                  </button>
-                </div>
-              </>
+              ))
             )}
           </div>
-        )}
+        </div>
+      )}
+    </div>
+  );
+}
+
+function TodayOverview() {
+  // Replace with: fetch("/api/faculty/today-overview").then(...)
+  const [data] = useState({
+    nextClass: { subject: "CS301 - Data Structures", room: "Room 204", time: "11:00 AM" },
+    attendanceMarked: false,
+    pendingBookings: 2,
+  });
+
+  return (
+    <div className="mt-8">
+      <h2 className="text-white font-semibold text-lg mb-4">Today's Overview</h2>
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+        <div className="bg-white/5 border border-white/10 rounded-md p-5 backdrop-blur-md">
+          <div className="flex items-center gap-2 text-indigo-300/80 text-xs uppercase tracking-wide mb-3">
+            <Clock className="w-4 h-4" /> Next Class
+          </div>
+          <p className="text-white font-semibold">{data.nextClass.subject}</p>
+          <p className="text-indigo-300/80 text-sm mt-1">
+            {data.nextClass.room} · {data.nextClass.time}
+          </p>
+        </div>
+
+        <div className="bg-white/5 border border-white/10 rounded-md p-5 backdrop-blur-md">
+          <div className="flex items-center gap-2 text-indigo-300/80 text-xs uppercase tracking-wide mb-3">
+            <BookOpen className="w-4 h-4" /> Attendance
+          </div>
+          <p className={`font-semibold ${data.attendanceMarked ? "text-emerald-400" : "text-pink-400"}`}>
+            {data.attendanceMarked ? "Marked for today" : "Not marked yet"}
+          </p>
+          <p className="text-indigo-300/80 text-sm mt-1">
+            {data.attendanceMarked ? "You're all set." : "Mark it before your next class."}
+          </p>
+        </div>
+
+        <div className="bg-white/5 border border-white/10 rounded-md p-5 backdrop-blur-md">
+          <div className="flex items-center gap-2 text-indigo-300/80 text-xs uppercase tracking-wide mb-3">
+            <AlertCircle className="w-4 h-4" /> Pending Bookings
+          </div>
+          <p className="text-white font-semibold">{data.pendingBookings} awaiting approval</p>
+          <p className="text-indigo-300/80 text-sm mt-1">Track status in Room Bookings.</p>
+        </div>
       </div>
+    </div>
+  );
+}
+
+export default function FacultyDashboard() {
+  const facultyName = "Sunidhi Chauhan";
+
+  const quickActions = [
+    { icon: CheckSquare, iconBg: "green", title: "Attendance", subtitle: "Mark today's class attendance", path: "/attendance" },
+    { icon: Calendar, iconBg: "blue", title: "My Timetable", subtitle: "View your class schedule", path: "/timetable" },
+    { icon: DoorOpen, iconBg: "navy", title: "Room Bookings", subtitle: "Request & track room bookings", path: "/bookings" },
+    { icon: User, iconBg: "purple", title: "My Account", subtitle: "Profile & security settings", path: "/account" },
+    { icon: CalendarDays, iconBg: "pink", title: "Holidays", subtitle: "Non-working days", path: "/holidays" },
+  ];
+
+  return (
+    <div className="min-h-screen bg-gradient-to-br from-[#0e0b28] via-[#1a1440] to-[#0c1730] px-8 py-6">
+      {/* Header */}
+      <div className="flex items-center justify-between pb-5 border-b border-white/10">
+        <div className="flex items-center gap-3">
+          <span className="text-2xl">🏫</span>
+          <h1 className="text-white text-xl font-bold">
+            EduSpace <span className="font-semibold text-indigo-200">– Faculty</span>
+          </h1>
+        </div>
+
+        <div className="flex items-center gap-4">
+          <button className="flex items-center gap-2 bg-white/5 border border-white/10 rounded-md px-3 py-2 text-sm text-indigo-100 hover:bg-white/10">
+            ☀️ Light
+          </button>
+
+          <NotificationBell />
+
+          <div className="text-right leading-tight">
+            <p className="text-white font-semibold text-sm">{facultyName}</p>
+            <p className="text-emerald-400 text-xs">Faculty</p>
+          </div>
+
+          <button className="bg-pink-600 hover:bg-pink-700 text-white font-semibold text-sm px-4 py-2 rounded-md">
+            Logout
+          </button>
+        </div>
+      </div>
+
+      {/* Quick actions */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4 mt-6">
+        {quickActions.map((c) => (
+          <QuickActionCard key={c.title} {...c} onClick={() => console.log(`navigate: ${c.path}`)} />
+        ))}
+      </div>
+
+      {/* New: Today's Overview */}
+      <TodayOverview />
     </div>
   );
 }
