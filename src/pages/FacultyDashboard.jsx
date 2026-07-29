@@ -43,7 +43,7 @@ export default function FacultyDashboard() {
   });
   const [message, setMessage] = useState({ type: '', text: '' });
 
-  useEffect(() => { loadData(); }, []);
+  useEffect(() => { loadData(); loadMarkableClasses(); }, []);
 
   const loadData = async () => {
     try {
@@ -184,6 +184,12 @@ export default function FacultyDashboard() {
   const absentCount      = roster.filter(r => r.status === 'absent').length;
   const outOfCampusCount = roster.filter(r => r.status === 'out_of_campus').length;
 
+  // ── TODAY'S OVERVIEW (derived from state already loaded above) ──
+  const todayStr = new Date().toISOString().split('T')[0];
+  const pendingRequestsCount = myRequests.filter(r => r.status === 'PENDING').length;
+  const todaysBookings = myBookings.filter(b => b.date === todayStr);
+  const openClassesToMark = markableClasses.filter(c => !c.already_marked);
+
   return (
     <div className="dashboard">
       {/* Navbar */}
@@ -193,6 +199,7 @@ export default function FacultyDashboard() {
           <h1>EduSpace – Faculty</h1>
         </div>
         <div className="navbar-right">
+          <NotificationBell />
           <ThemeToggle />
           <div className="user-info">
             <p className="user-name">{user?.first_name} {user?.last_name}</p>
@@ -231,6 +238,51 @@ export default function FacultyDashboard() {
                 <span className="dmc-desc">{desc}</span>
               </button>
             ))}
+          </div>
+        )}
+
+        {/* ── TODAY'S OVERVIEW ─────────────────────────────────── */}
+        {activeTab === 'menu' && (
+          <div className="tab-content" style={{ marginTop: '2rem' }}>
+            <h2 style={{ marginBottom: '1rem' }}>Today's Overview</h2>
+            <div className="attendance-summary-bar">
+              <div className="att-stat-card" style={{ background: '#fef2f2' }}>
+                <p className="att-stat-value" style={{ color: '#ef4444' }}>
+                  {openClassesToMark.length}
+                </p>
+                <p className="att-stat-label">
+                  {openClassesToMark.length === 1 ? 'Class' : 'Classes'} open to mark
+                </p>
+              </div>
+
+              <div className="att-stat-card" style={{ background: '#fffbeb' }}>
+                <p className="att-stat-value" style={{ color: '#f59e0b' }}>
+                  {pendingRequestsCount}
+                </p>
+                <p className="att-stat-label">Pending booking requests</p>
+              </div>
+
+              <div className="att-stat-card" style={{ background: '#eff6ff' }}>
+                <p className="att-stat-value" style={{ color: '#3b82f6' }}>
+                  {todaysBookings.length}
+                </p>
+                <p className="att-stat-label">Confirmed booking{todaysBookings.length !== 1 ? 's' : ''} today</p>
+              </div>
+            </div>
+
+            {openClassesToMark.length > 0 && (
+              <p style={{ marginTop: '0.75rem', color: 'var(--text-secondary)', fontSize: '14px' }}>
+                Next up: <strong>{openClassesToMark[0].subject_name}</strong> · {openClassesToMark[0].slot_name}
+                {' '}
+                <button
+                  className="btn-mark-attendance"
+                  style={{ marginLeft: '0.75rem' }}
+                  onClick={() => { setActiveTab('attendance'); openClassAttendance(openClassesToMark[0]); }}
+                >
+                  ✅ Mark Attendance
+                </button>
+              </p>
+            )}
           </div>
         )}
 
