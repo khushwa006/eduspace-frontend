@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import './MyAccount.css';
 
 const API = 'https://eduspace-backend-bh29.onrender.com';
@@ -27,6 +27,16 @@ export default function MyAccount() {
   const [activityLoading, setActivityLoading] = useState(true);
   const [activityTab, setActivityTab] = useState('recent');   // 'recent' | 'logins'
   const [expandedActivity, setExpandedActivity] = useState(null);
+
+  const photoInputRef = useRef(null);
+  const videoRef = useRef(null);
+  const canvasRef = useRef(null);
+  const streamRef = useRef(null);
+
+  const [showCapture, setShowCapture] = useState(false);
+  const [capturedPhoto, setCapturedPhoto] = useState(null); // base64 preview, pre-submit
+  const [cameraError, setCameraError] = useState('');
+  const [submittingPhoto, setSubmittingPhoto] = useState(false);
 
   const loadProfile = async () => {
     setLoading(true);
@@ -61,6 +71,85 @@ export default function MyAccount() {
 
   const initials = `${(profile.first_name||'?').charAt(0)}${(profile.last_name||'').charAt(0)}`.toUpperCase();
   const roleLabel = profile.role ? profile.role.charAt(0).toUpperCase() + profile.role.slice(1) : '';
+  const isStudent = profile.role && profile.role.toLowerCase() === 'student';
+  const photoLocked = isStudent && !!profile.photo_locked;
+  const needsPhotoForFaceVerification = isStudent && !profile.profile_photo;
+
+  const openCapture = async () => {
+    setCameraError('');
+    setCapturedPhoto(null);
+    setShowCapture(true);
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: 'user' } });
+      streamRef.current = stream;
+      if (videoRef.current) {
+        videoRef.current.srcObject = stream;
+        await videoRef.current.play();
+      }
+    } catch {
+      setCameraError('Camera access denied. Please allow camera permission and try again.');
+    }
+  };
+
+  const stopStream = () => {
+    if (streamRef.current) {
+      streamRef.current.getTracks().forEach(t => t.stop());
+      streamRef.current = null;
+    }
+  };
+
+  const closeCapture = () => {
+    stopStream();
+    setShowCapture(false);
+    setCapturedPhoto(null);
+    setCameraError('');
+  };
+
+  const takePhoto = () => {
+    const video = videoRef.current;
+    const canvas = canvasRef.current;
+    if (!video || !canvas) return;
+    canvas.width = video.videoWidth;
+    canvas.height = video.videoHeight;
+    canvas.getContext('2d').drawImage(video, 0, 0);
+    setCapturedPhoto(canvas.toDataURL('image/jpeg', 0.9));
+    stopStream(); // freeze on the captured frame
+  };
+
+  const retakePhoto = async () => {
+    setCapturedPhoto(null);
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: 'user' } });
+      streamRef.current = stream;
+      if (videoRef.current) {
+        videoRef.current.srcObject = stream;
+        await videoRef.current.play();
+      }
+    } catch {
+      setCameraError('Camera access denied. Please allow camera permission and try again.');
+    }
+  };
+
+  const confirmCapturedPhoto = async () => {
+    if (!capturedPhoto) return;
+    setSubmittingPhoto(true);
+    try {
+      const res = await fetch(`${API}/api/auth/profile/photo`, {
+        method: 'POST', headers: authHeaders(), body: JSON.stringify({ photo: capturedPhoto })
+      });
+      const data = await res.json();
+      if (res.ok) {
+        setProfile(p => ({ ...p, profile_photo: capturedPhoto, photo_locked: data.photo_locked }));
+        closeCapture();
+      } else {
+        setCameraError(data.error || 'Upload failed');
+      }
+    } catch (err) {
+      setCameraError('Error: ' + err.message);
+    } finally {
+      setSubmittingPhoto(false);
+    }
+  };
 
   const handlePhotoUpload = (e) => {
     const file = e.target.files[0];
@@ -159,12 +248,22 @@ export default function MyAccount() {
             ? <img src={profile.profile_photo} alt="Profile" className="ma-avatar-img" />
             : <div className="ma-avatar-lg">{initials}</div>
           }
-          <label className="ma-photo-overlay" title="Change photo">
-            📷
-            <input type="file" accept="image/*" style={{ display: 'none' }} onChange={handlePhotoUpload} />
-          </label>
-          {profile.profile_photo && (
-            <button className="ma-photo-remove" onClick={handleRemovePhoto} title="Remove photo">✕</button>
+          {isStudent ? (
+            photoLocked ? (
+              <span className="ma-photo-locked" title="Photo locked — contact admin to change">🔒</span>
+            ) : (
+              <button className="ma-photo-overlay" title="Take photo" onClick={openCapture}>📷</button>
+            )
+          ) : (
+            <>
+              <label className="ma-photo-overlay" title="Change photo">
+                📷
+                <input ref={photoInputRef} type="file" accept="image/*" style={{ display: 'none' }} onChange={handlePhotoUpload} />
+              </label>
+              {profile.profile_photo && (
+                <button className="ma-photo-remove" onClick={handleRemovePhoto} title="Remove photo">✕</button>
+              )}
+            </>
           )}
         </div>
         <div className="ma-hero-info">
@@ -187,6 +286,64 @@ export default function MyAccount() {
           </button>
         )}
       </div>
+
+      {/* ── FACE VERIFICATION NUDGE ─────────────────────────── */}
+      {needsPhotoForFaceVerification && !photoLocked && (
+        <div className="ma-photo-nudge">
+          <span className="ma-photo-nudge-icon">📸</span>
+          <div className="ma-photo-nudge-text">
+            <p className="ma-photo-nudge-title">Add a profile photo to enable face verification</p>
+            <p className="ma-photo-nudge-sub">
+              GPS check-in also verifies your identity against your profile photo. You can retake it
+              as many times as you like before submitting — but once submitted, you'll need admin to
+              change it. Without one, check-ins are flagged for manual faculty review.
+            </p>
+          </div>
+          <button className="ma-photo-nudge-btn" onClick={openCapture}>
+            Take Photo
+          </button>
+        </div>
+      )}
+
+      {/* ── PHOTO CAPTURE MODAL ─────────────────────────────── */}
+      {showCapture && (
+        <div className="ma-capture-overlay" onClick={closeCapture}>
+          <div className="ma-capture-modal" onClick={e => e.stopPropagation()}>
+            <h3 className="ma-section-title">📸 Set Your Profile Photo</h3>
+            <p className="ma-capture-note">
+              This photo is used to verify your identity at attendance check-in. Retake as many times
+              as you like — once you submit, you'll need to contact admin to change it.
+            </p>
+
+            {cameraError && <p className="ma-field-error">{cameraError}</p>}
+
+            <div className="ma-capture-frame">
+              {capturedPhoto ? (
+                <img src={capturedPhoto} alt="Captured preview" className="ma-capture-preview" />
+              ) : (
+                <video ref={videoRef} className="ma-capture-video" muted playsInline />
+              )}
+            </div>
+            <canvas ref={canvasRef} style={{ display: 'none' }} />
+
+            <div className="ma-form-buttons">
+              {!capturedPhoto ? (
+                <>
+                  <button className="ma-btn-save" onClick={takePhoto} disabled={!!cameraError}>📸 Take Photo</button>
+                  <button className="ma-btn-cancel" onClick={closeCapture}>Cancel</button>
+                </>
+              ) : (
+                <>
+                  <button className="ma-btn-save" onClick={confirmCapturedPhoto} disabled={submittingPhoto}>
+                    {submittingPhoto ? 'Submitting…' : '✅ Confirm & Submit'}
+                  </button>
+                  <button className="ma-btn-cancel" onClick={retakePhoto} disabled={submittingPhoto}>🔄 Retake</button>
+                </>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
 
       <div className="ma-grid">
         {/* ── LEFT: PERSONAL INFO / EDIT FORM ───────────────── */}

@@ -119,3 +119,49 @@
   .ma-info-left { min-width: 130px; }
   .ma-form-row { grid-template-columns: 1fr; }
 }
+/* ── PHOTO LOCK INDICATOR (replaces camera overlay once a student's photo is locked) ── */
+.ma-photo-locked {
+  position: absolute; inset: 0; border-radius: 50%;
+  display: flex; align-items: center; justify-content: center; font-size: 18px;
+  background: rgba(0,0,0,0.45); color: #fbbf24; cursor: default;
+}
+
+/* ── PROFILE PHOTO NUDGE BANNER ──────────────────────────────── */
+.ma-photo-nudge {
+  display: flex; align-items: center; gap: 16px;
+  background: rgba(245,158,11,0.10); border: 1px solid rgba(245,158,11,0.3);
+  border-radius: 12px; padding: 16px 20px; margin-bottom: 24px;
+}
+.ma-photo-nudge-icon { font-size: 28px; flex-shrink: 0; }
+.ma-photo-nudge-text { flex: 1; min-width: 0; }
+.ma-photo-nudge-title { font-size: 14px; font-weight: 700; color: var(--text-primary); margin: 0 0 4px; }
+.ma-photo-nudge-sub { font-size: 12.5px; color: var(--text-secondary); margin: 0; line-height: 1.5; }
+.ma-photo-nudge-btn {
+  padding: 9px 18px; border-radius: 8px; border: none; background: #f59e0b; color: #1e2433;
+  font-weight: 700; font-size: 13px; cursor: pointer; white-space: nowrap; flex-shrink: 0; transition: all 0.15s;
+}
+.ma-photo-nudge-btn:hover { background: #fbbf24; }
+
+/* ── PHOTO CAPTURE MODAL ─────────────────────────────────────── */
+.ma-capture-overlay {
+  position: fixed; inset: 0; background: rgba(0,0,0,0.65); backdrop-filter: blur(3px);
+  display: flex; align-items: center; justify-content: center; z-index: 1000; padding: 20px;
+}
+.ma-capture-modal {
+  background: var(--bg-primary); border: 1px solid var(--border-color); border-radius: 16px;
+  padding: 24px; max-width: 440px; width: 100%; box-shadow: 0 20px 60px rgba(0,0,0,0.4);
+}
+.ma-capture-note { font-size: 12.5px; color: var(--text-secondary); margin: -8px 0 16px; line-height: 1.5; }
+.ma-capture-frame {
+  width: 100%; aspect-ratio: 4 / 3; border-radius: 12px; overflow: hidden;
+  background: #000; display: flex; align-items: center; justify-content: center; margin-bottom: 4px;
+}
+.ma-capture-video, .ma-capture-preview {
+  width: 100%; height: 100%; object-fit: cover; transform: scaleX(-1); /* mirror, like a selfie camera */
+}
+
+/* ── RESPONSIVE ──────────────────────────────────────────────── */
+@media (max-width: 768px) {
+  .ma-photo-nudge { flex-direction: column; align-items: flex-start; }
+  .ma-photo-nudge-btn { width: 100%; }
+}
